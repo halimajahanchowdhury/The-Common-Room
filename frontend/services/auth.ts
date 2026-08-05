@@ -29,9 +29,21 @@ export const loginUser = async (
 export const getCurrentUser = async (token: string) => {
     const response = await api.get("accounts/me/", {
         headers: {
-            Authorization: `Bearer ${token}`,
+            "Authorization": `Bearer ${token}`,
         },
     });
 
     return response.data;
 };
+
+
+export const getProfile = async (token: string) => {
+    const response = await api.get("profiles/me/", {
+        headers: {
+            "Authorization": `Bearer ${token}`,
+        },
+    });
+
+    return response.data;
+};
+

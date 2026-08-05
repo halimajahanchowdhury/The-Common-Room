@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getCurrentUser } from "../../services/auth";
+import { getCurrentUser, getProfile } from "../../services/auth";
 
 export default function DashboardPage() {
     const [user, setUser] = useState<any>(null);
+    const [profile, setProfile] = useState<any>(null);
 
     useEffect(() => {
         const token = localStorage.getItem("access");
@@ -16,6 +17,13 @@ export default function DashboardPage() {
         getCurrentUser(token)
             .then((data) => setUser(data))
             .catch((error) => console.error(error));
+
+
+
+        getProfile(token)
+            .then((data) => setProfile(data))
+            .catch((error) => console.error(error));
+
     }, []);
 
     const logout = () => {
@@ -49,8 +57,8 @@ export default function DashboardPage() {
                             Skills I Can Teach
                         </h3>
 
-                        <p className="text-gray-500">
-                            (Coming next)
+                        <p className="text-gray-600">
+                            {profile?.skills_can_teach}
                         </p>
 
                         <br />
@@ -59,8 +67,8 @@ export default function DashboardPage() {
                             Skills I Want to Learn
                         </h3>
 
-                        <p className="text-gray-500">
-                            (Coming next)
+                        <p className="text-gray-600">
+                            {profile?.skills_want_to_learn}
                         </p>
 
                         <br />
