@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getProfileById, sendCollaborationRequest } from "../../../services/auth";
+import {
+    getProfileById,
+    sendCollaborationRequest,
+    getComments,
+    createComment,
+    getCollaborationStatus,
+} from "../../../services/auth";
 
 
 export default function StudentProfilePage() {
@@ -13,7 +19,30 @@ export default function StudentProfilePage() {
 
     const [profile, setProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
     const [message, setMessage] = useState("");
+
+    const [collaborationStatus, setCollaborationStatus] = useState("");
+
+    const [commentMessage, setCommentMessage] = useState("");
+
+    const [comments, setComments] = useState<any[]>([]);
+    const [commentText, setCommentText] = useState("");
+
+
+
+    const loadComments = () => {
+
+        const token = localStorage.getItem("access");
+
+        if (!token) return;
+
+        getComments(id, token)
+            .then((data) => setComments(data))
+            .catch((error) => console.error(error));
+
+    };
+
 
 
     useEffect(() => {
@@ -41,7 +70,26 @@ export default function StudentProfilePage() {
             });
 
 
+
+        getCollaborationStatus(id, token)
+            .then((data) => {
+
+                setCollaborationStatus(data.status);
+
+            })
+            .catch((error) => {
+
+                console.error(error);
+
+            });
+
+
+
+        loadComments();
+
+
     }, [id]);
+
 
 
 
@@ -54,13 +102,9 @@ export default function StudentProfilePage() {
             return;
         }
 
-
         try {
 
-            await sendCollaborationRequest(
-                id,
-                token
-            );
+            await sendCollaborationRequest(id, token);
 
             setMessage("Collaboration request sent successfully!");
 
@@ -69,6 +113,50 @@ export default function StudentProfilePage() {
             console.error(error);
 
             setMessage("Something went wrong.");
+
+        }
+
+    };
+
+
+
+    const handleComment = async () => {
+
+        const token = localStorage.getItem("access");
+
+        if (!token) return;
+
+        if (commentText.trim() === "") return;
+
+        try {
+
+            await createComment(
+                id,
+                commentText,
+                token
+            );
+
+            setCommentText("");
+
+            setCommentMessage("Comment posted successfully!");
+
+            loadComments();
+
+        } catch (error: any) {
+
+            if (error.response?.status === 403) {
+
+                setCommentMessage(
+                    "You can only comment after your collaboration request has been accepted."
+                );
+
+            } else {
+
+                setCommentMessage(
+                    "Something went wrong while posting your comment."
+                );
+
+            }
 
         }
 
@@ -104,24 +192,17 @@ export default function StudentProfilePage() {
 
         <div className="min-h-screen bg-gray-100 p-10">
 
-
             <div className="mx-auto max-w-3xl rounded-xl bg-white p-8 shadow-lg">
-
 
                 <h1 className="mb-6 text-4xl font-bold">
                     {profile.full_name}
                 </h1>
 
-
                 <p className="mb-6 text-gray-600">
                     {profile.university || "University not added"}
                 </p>
 
-
-
                 <hr className="my-6" />
-
-
 
                 <h2 className="text-xl font-semibold">
                     Skills I Can Teach
@@ -131,9 +212,6 @@ export default function StudentProfilePage() {
                     {profile.skills_can_teach || "Not added yet"}
                 </p>
 
-
-
-
                 <h2 className="text-xl font-semibold">
                     Skills I Want to Learn
                 </h2>
@@ -141,9 +219,6 @@ export default function StudentProfilePage() {
                 <p className="mb-6 text-gray-600">
                     {profile.skills_want_to_learn || "Not added yet"}
                 </p>
-
-
-
 
                 <h2 className="text-xl font-semibold">
                     Bio
@@ -153,15 +228,49 @@ export default function StudentProfilePage() {
                     {profile.bio || "No bio added yet"}
                 </p>
 
+                {
+                    collaborationStatus === "self" ? (
 
+                        null
 
+                    ) : collaborationStatus === "none" ? (
 
-                <button
-                    onClick={handleRequest}
-                    className="w-full rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700"
-                >
-                    Send Collaboration Request
-                </button>
+                        <button
+                            onClick={handleRequest}
+                            className="w-full rounded-lg bg-blue-600 py-3 text-white hover:bg-blue-700"
+                        >
+                            Send Collaboration Request
+                        </button>
+
+                    ) : collaborationStatus === "pending" ? (
+
+                        <button
+                            disabled
+                            className="w-full rounded-lg bg-yellow-500 py-3 text-white cursor-not-allowed"
+                        >
+                            Request Pending
+                        </button>
+
+                    ) : collaborationStatus === "accepted" ? (
+
+                        <button
+                            disabled
+                            className="w-full rounded-lg bg-green-600 py-3 text-white cursor-not-allowed"
+                        >
+                            ✓ Collaboration Accepted
+                        </button>
+
+                    ) : collaborationStatus === "rejected" ? (
+
+                        <button
+                            disabled
+                            className="w-full rounded-lg bg-red-600 py-3 text-white cursor-not-allowed"
+                        >
+                            Request Rejected
+                        </button>
+
+                    ) : null
+                }
 
 
                 {message && (
@@ -174,8 +283,73 @@ export default function StudentProfilePage() {
 
 
 
-            </div>
+                <hr className="my-8" />
 
+                <h2 className="mb-4 text-2xl font-bold">
+                    Comments
+                </h2>
+
+                <textarea
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="mb-4 w-full rounded-lg border p-4"
+                    rows={4}
+                />
+
+                <button
+                    onClick={handleComment}
+                    className="rounded-lg bg-green-600 px-6 py-3 text-white hover:bg-green-700"
+                >
+                    Post Comment
+                </button>
+
+                {commentMessage && (
+
+                    <p className="mt-4 mb-8 text-center text-blue-600 font-medium">
+                        {commentMessage}
+                    </p>
+
+                )}
+
+                <div className="space-y-4">
+
+                    {comments.length === 0 ? (
+
+                        <p className="text-gray-500">
+                            No comments yet.
+                        </p>
+
+                    ) : (
+
+                        comments.map((comment) => (
+
+                            <div
+                                key={comment.id}
+                                className="rounded-lg border p-4"
+                            >
+
+                                <p className="font-semibold">
+                                    {comment.author_username}
+                                </p>
+
+                                <p className="mt-2">
+                                    {comment.content}
+                                </p>
+
+                                <p className="mt-2 text-sm text-gray-500">
+                                    {new Date(comment.created_at).toLocaleString()}
+                                </p>
+
+                            </div>
+
+                        ))
+
+                    )}
+
+                </div>
+
+            </div>
 
         </div>
 

@@ -129,6 +129,103 @@ export const sendCollaborationRequest = async (
 };
 
 
+export const getReceivedCollaborationRequests = async (
+    token: string
+) => {
+
+    const response = await api.get(
+        "collaborations/received/",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+export const updateCollaborationRequest = async (
+    requestId: number,
+    status: string,
+    token: string
+) => {
+
+    const response = await api.patch(
+        `collaborations/${requestId}/`,
+        {
+            status,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+export const getComments = async (
+    profileId: number,
+    token: string
+) => {
+
+    const response = await api.get(
+        `posts/profile/${profileId}/`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+export const createComment = async (
+    profileId: number,
+    content: string,
+    token: string
+) => {
+
+    const response = await api.post(
+        "posts/create/",
+        {
+            profile: profileId,
+            content: content,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+export const getCollaborationStatus = async (
+    userId: number,
+    token: string
+) => {
+
+    const response = await api.get(
+        `collaborations/status/${userId}/`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+
+
 
 
 

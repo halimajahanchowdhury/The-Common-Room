@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import CreateCollaborationRequestView
+from .views import (
+    CreateCollaborationRequestView,
+    ReceivedCollaborationRequestsView,
+    UpdateCollaborationRequestView,
+    CollaborationStatusView,
+)
 
 
 urlpatterns = [
@@ -11,4 +16,23 @@ urlpatterns = [
         name="create-collaboration-request"
     ),
 
+    path(
+        "received/",
+        ReceivedCollaborationRequestsView.as_view(),
+        name="received-collaboration-requests"
+    ),
+
+    path(
+        "status/<int:user_id>/",
+        CollaborationStatusView.as_view(),
+        name="collaboration-status"
+    ),
+
+    path(
+        "<int:pk>/",
+        UpdateCollaborationRequestView.as_view(),
+        name="update-collaboration-request"
+    ),
+
 ]
+
