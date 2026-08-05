@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { loginUser } from "../../services/auth";
+import { registerUser } from "../../services/auth";
 
 
-export default function LoginPage() {
+export default function SignupPage() {
 
 
     const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const [message, setMessage] = useState("");
@@ -23,38 +24,37 @@ export default function LoginPage() {
 
         try {
 
-            const data = await loginUser(
+            await registerUser(
                 username,
+                email,
                 password
             );
 
 
-            localStorage.setItem(
-                "access",
-                data.access
+            setMessage(
+                "Account created successfully ✅ You can login now."
             );
 
 
-            localStorage.setItem(
-                "refresh",
-                data.refresh
+            setUsername("");
+            setEmail("");
+            setPassword("");
+
+
+        } catch (error: any) {
+
+            console.error(
+                error.response?.data
             );
-
-
-            window.location.href = "/dashboard";
-
-
-        } catch (error) {
-
-            console.error(error);
 
             setMessage(
-                "❌ Login failed"
+                JSON.stringify(error.response?.data)
             );
 
         }
 
     };
+
 
 
 
@@ -67,7 +67,7 @@ export default function LoginPage() {
 
 
                 <h1 className="mb-6 text-center text-3xl font-bold">
-                    Login
+                    Create Account
                 </h1>
 
 
@@ -79,48 +79,39 @@ export default function LoginPage() {
 
 
                     <input
-
                         className="w-full rounded border p-3"
-
                         placeholder="Username"
-
                         value={username}
-
-                        onChange={(e) =>
-                            setUsername(e.target.value)
-                        }
-
+                        onChange={(e) => setUsername(e.target.value)}
                     />
 
 
 
                     <input
-
                         className="w-full rounded border p-3"
+                        placeholder="Email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
 
+
+
+                    <input
+                        className="w-full rounded border p-3"
                         placeholder="Password"
-
                         type="password"
-
                         value={password}
-
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
-
+                        onChange={(e) => setPassword(e.target.value)}
                     />
 
 
 
                     <button
-
                         className="w-full rounded bg-blue-600 p-3 text-white hover:bg-blue-700"
-
                         type="submit"
-
                     >
-                        Login
-
+                        Sign Up
                     </button>
 
 
@@ -140,19 +131,16 @@ export default function LoginPage() {
 
                 <p className="mt-4 text-center text-gray-600">
 
-                    Don't have an account?{" "}
-
+                    Already have an account?{" "}
 
                     <a
-                        href="/signup"
+                        href="/login"
                         className="text-blue-600 hover:underline"
                     >
-                        Sign Up
+                        Login
                     </a>
 
-
                 </p>
-
 
 
             </div>
