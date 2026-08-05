@@ -91,4 +91,44 @@ export const getAllProfiles = async (
     return response.data;
 };
 
+export const getProfileById = async (
+    id: number,
+    token: string
+) => {
+
+    const response = await api.get(
+        `profiles/${id}/`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+export const sendCollaborationRequest = async (
+    receiverId: number,
+    token: string
+) => {
+
+    const response = await api.post(
+        "collaborations/create/",
+        {
+            receiver: receiverId,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
+
+
 

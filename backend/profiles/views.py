@@ -21,4 +21,11 @@ class ProfileListView(generics.ListAPIView):
 
     queryset = Profile.objects.all()
 
-    
+
+# View one student's profile
+class ProfileDetailView(generics.RetrieveAPIView):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    queryset = Profile.objects.all()
+

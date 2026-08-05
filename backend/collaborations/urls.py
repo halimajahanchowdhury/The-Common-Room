@@ -1,5 +1,14 @@
 from django.urls import path
 
+from .views import CreateCollaborationRequestView
+
+
 urlpatterns = [
-    # Add routes here later
+
+    path(
+        "create/",
+        CreateCollaborationRequestView.as_view(),
+        name="create-collaboration-request"
+    ),
+
 ]
