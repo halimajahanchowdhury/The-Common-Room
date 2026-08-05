@@ -19,18 +19,19 @@ export default function DashboardPage() {
             .catch((error) => console.error(error));
 
 
-
         getProfile(token)
             .then((data) => setProfile(data))
             .catch((error) => console.error(error));
 
     }, []);
 
+
     const logout = () => {
         localStorage.removeItem("access");
         localStorage.removeItem("refresh");
         window.location.href = "/login";
     };
+
 
     return (
         <div className="min-h-screen bg-gray-100 p-10">
@@ -41,37 +42,59 @@ export default function DashboardPage() {
                     The Common Room
                 </h1>
 
+
                 {user ? (
+
                     <>
+
                         <h2 className="text-2xl font-semibold">
                             Welcome, {user.username} 👋
                         </h2>
+
 
                         <p className="mt-2 text-gray-600">
                             {user.email}
                         </p>
 
+
                         <hr className="my-8" />
+
 
                         <h3 className="text-xl font-semibold">
                             Skills I Can Teach
                         </h3>
 
                         <p className="text-gray-600">
-                            {profile?.skills_can_teach}
+                            {profile?.skills_can_teach || "Not added yet"}
                         </p>
 
+
                         <br />
+
 
                         <h3 className="text-xl font-semibold">
                             Skills I Want to Learn
                         </h3>
 
                         <p className="text-gray-600">
-                            {profile?.skills_want_to_learn}
+                            {profile?.skills_want_to_learn || "Not added yet"}
                         </p>
 
+
                         <br />
+
+
+                        <h3 className="text-xl font-semibold">
+                            Bio
+                        </h3>
+
+                        <p className="text-gray-600">
+                            {profile?.bio || "No bio added yet"}
+                        </p>
+
+
+                        <br />
+
 
                         <h3 className="text-xl font-semibold">
                             Recent Posts
@@ -81,15 +104,36 @@ export default function DashboardPage() {
                             (Coming next)
                         </p>
 
-                        <button
-                            onClick={logout}
-                            className="mt-8 rounded bg-red-600 px-6 py-3 text-white hover:bg-red-700"
-                        >
-                            Logout
-                        </button>
+
+
+                        <div className="mt-8 flex gap-4">
+
+                            <button
+                                onClick={() => {
+                                    window.location.href = "/profile/edit";
+                                }}
+                                className="rounded bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+                            >
+                                Edit Profile
+                            </button>
+
+
+                            <button
+                                onClick={logout}
+                                className="rounded bg-red-600 px-6 py-3 text-white hover:bg-red-700"
+                            >
+                                Logout
+                            </button>
+
+                        </div>
+
+
                     </>
+
                 ) : (
+
                     <p>Loading...</p>
+
                 )}
 
             </div>
