@@ -19,7 +19,7 @@ export default function LoginPage() {
             localStorage.setItem("access", data.access);
             localStorage.setItem("refresh", data.refresh);
 
-            setMessage("✅ Login successful!");
+            window.location.href = "/dashboard";
 
             setUsername("");
             setPassword("");

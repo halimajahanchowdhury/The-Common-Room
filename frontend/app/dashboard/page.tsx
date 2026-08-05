@@ -1,0 +1,91 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getCurrentUser } from "../../services/auth";
+
+export default function DashboardPage() {
+    const [user, setUser] = useState<any>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem("access");
+
+        if (!token) {
+            return;
+        }
+
+        getCurrentUser(token)
+            .then((data) => setUser(data))
+            .catch((error) => console.error(error));
+    }, []);
+
+    const logout = () => {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+        window.location.href = "/login";
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-100 p-10">
+
+            <div className="mx-auto max-w-4xl rounded-xl bg-white p-8 shadow-lg">
+
+                <h1 className="mb-6 text-4xl font-bold">
+                    The Common Room
+                </h1>
+
+                {user ? (
+                    <>
+                        <h2 className="text-2xl font-semibold">
+                            Welcome, {user.username} 👋
+                        </h2>
+
+                        <p className="mt-2 text-gray-600">
+                            {user.email}
+                        </p>
+
+                        <hr className="my-8" />
+
+                        <h3 className="text-xl font-semibold">
+                            Skills I Can Teach
+                        </h3>
+
+                        <p className="text-gray-500">
+                            (Coming next)
+                        </p>
+
+                        <br />
+
+                        <h3 className="text-xl font-semibold">
+                            Skills I Want to Learn
+                        </h3>
+
+                        <p className="text-gray-500">
+                            (Coming next)
+                        </p>
+
+                        <br />
+
+                        <h3 className="text-xl font-semibold">
+                            Recent Posts
+                        </h3>
+
+                        <p className="text-gray-500">
+                            (Coming next)
+                        </p>
+
+                        <button
+                            onClick={logout}
+                            className="mt-8 rounded bg-red-600 px-6 py-3 text-white hover:bg-red-700"
+                        >
+                            Logout
+                        </button>
+                    </>
+                ) : (
+                    <p>Loading...</p>
+                )}
+
+            </div>
+
+        </div>
+    );
+}
