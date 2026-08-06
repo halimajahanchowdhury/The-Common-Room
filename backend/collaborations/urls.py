@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     CreateCollaborationRequestView,
     ReceivedCollaborationRequestsView,
+    SentCollaborationRequestsView,
     UpdateCollaborationRequestView,
     CollaborationStatusView,
 )
@@ -23,6 +24,12 @@ urlpatterns = [
     ),
 
     path(
+        "sent/",
+        SentCollaborationRequestsView.as_view(),
+        name="sent-collaboration-requests"
+    ),
+
+    path(
         "status/<int:user_id>/",
         CollaborationStatusView.as_view(),
         name="collaboration-status"
@@ -35,4 +42,5 @@ urlpatterns = [
     ),
 
 ]
+
 

@@ -3,19 +3,30 @@
 import { useEffect, useState } from "react";
 import { getAllProfiles } from "../../services/auth";
 import { useRouter } from "next/navigation";
+import Navbar from "../../components/Navbar";
+import Avatar from "../../components/Avatar";
 
+const POPULAR_SKILL_PILLS = [
+    "All",
+    "Python",
+    "JavaScript",
+    "React",
+    "Django",
+    "C++",
+    "Design",
+    "AI",
+    "Math",
+];
 
 export default function StudentsPage() {
-
     const router = useRouter();
 
     const [profiles, setProfiles] = useState<any[]>([]);
     const [search, setSearch] = useState("");
+    const [activePill, setActivePill] = useState("All");
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
-
         const token = localStorage.getItem("access");
 
         if (!token) {
@@ -25,133 +36,145 @@ export default function StudentsPage() {
 
         getAllProfiles(token)
             .then((data) => {
-                console.log("Profiles received:", data);
                 setProfiles(data);
                 setLoading(false);
             })
             .catch((error) => {
-                console.log("Backend error:", error.response?.data);
-                console.log("Status:", error.response?.status);
                 console.error(error);
                 setLoading(false);
             });
-
-
     }, []);
 
-
     const filteredProfiles = profiles.filter((profile) => {
-
         const query = search.toLowerCase();
 
-        return (
-
+        const matchesSearch =
             profile.full_name?.toLowerCase().includes(query) ||
-
             profile.university?.toLowerCase().includes(query) ||
-
             profile.skills_can_teach?.toLowerCase().includes(query) ||
+            profile.skills_want_to_learn?.toLowerCase().includes(query);
 
-            profile.skills_want_to_learn?.toLowerCase().includes(query)
+        if (activePill === "All") {
+            return matchesSearch;
+        }
 
-        );
+        const pillQuery = activePill.toLowerCase();
+        const matchesPill =
+            profile.skills_can_teach?.toLowerCase().includes(pillQuery) ||
+            profile.skills_want_to_learn?.toLowerCase().includes(pillQuery);
 
+        return matchesSearch && matchesPill;
     });
 
-
-    if (loading) {
-        return (
-            <div className="p-10 text-center text-xl">
-                Loading students...
-            </div>
-        );
-    }
-
-
     return (
+        <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+            <Navbar />
 
-        <div className="min-h-screen bg-gray-100 p-10">
+            <main className="flex-1 p-6 md:p-10">
+                <div className="mx-auto max-w-6xl">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                            Browse Students
+                        </h1>
+                        <p className="text-sm font-medium text-slate-500 mt-1">
+                            Find study partners, skill exchangers, and collaborators across campus.
+                        </p>
+                    </div>
 
-            <div className="mx-auto max-w-6xl">
+                    {/* Search & Skill Filter Pills */}
+                    <div className="mb-8 space-y-4">
+                        <input
+                            type="text"
+                            placeholder="Search by student name, university, or skills..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-xs focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                        />
 
-
-                <h1 className="mb-8 text-4xl font-bold">
-                    Browse Students
-                </h1>
-
-
-                <input
-                    type="text"
-                    placeholder="Search by name, university or skills..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="mb-8 w-full rounded-lg border p-4 text-lg shadow-sm focus:border-blue-500 focus:outline-none"
-                />
-
-
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
-
-                    {filteredProfiles.map((profile) => (
-
-                        <div
-                            key={profile.id}
-                            className="rounded-xl bg-white p-6 shadow-md transition hover:shadow-xl"
-                        >
-
-
-                            <h2 className="mb-2 text-2xl font-semibold">
-                                {profile.full_name}
-                            </h2>
-
-
-                            <p className="mb-3 text-gray-500">
-                                {profile.university || "University not added"}
-                            </p>
-
-
-                            <h3 className="font-semibold">
-                                Can Teach
-                            </h3>
-
-
-                            <p className="mb-4 text-gray-700">
-                                {profile.skills_can_teach || "No skills added"}
-                            </p>
-
-
-                            <h3 className="font-semibold">
-                                Wants to Learn
-                            </h3>
-
-
-                            <p className="mb-6 text-gray-700">
-                                {profile.skills_want_to_learn || "No skills added"}
-                            </p>
-
-
-                            <button
-                                onClick={() => router.push(`/students/${profile.id}`)}
-                                className="w-full rounded-lg bg-blue-600 py-3 text-white transition hover:bg-blue-700"
-                            >
-                                View Profile
-                            </button>
-
-
+                        {/* Quick Skill Filter Pills */}
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mr-1">
+                                Quick Filters:
+                            </span>
+                            {POPULAR_SKILL_PILLS.map((skill) => (
+                                <button
+                                    key={skill}
+                                    onClick={() => setActivePill(skill)}
+                                    className={`rounded-full px-3.5 py-1 text-xs font-semibold transition ${
+                                        activePill === skill
+                                            ? "bg-indigo-600 text-white shadow-xs"
+                                            : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                                    }`}
+                                >
+                                    {skill}
+                                </button>
+                            ))}
                         </div>
+                    </div>
 
-                    ))}
+                    {loading ? (
+                        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-400">
+                            Loading student profiles...
+                        </div>
+                    ) : filteredProfiles.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400">
+                            No student profiles matching your search criteria.
+                        </div>
+                    ) : (
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {filteredProfiles.map((profile) => (
+                                <div
+                                    key={profile.id}
+                                    className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+                                >
+                                    <div>
+                                        {/* Avatar & Header */}
+                                        <div className="flex items-center gap-3.5 mb-4">
+                                            <Avatar src={profile.profile_picture} name={profile.full_name} size="md" />
+                                            <div>
+                                                <h2 className="text-lg font-bold text-slate-900 line-clamp-1">
+                                                    {profile.full_name || "Student"}
+                                                </h2>
+                                                <p className="text-xs font-medium text-slate-500 line-clamp-1">
+                                                    🏫 {profile.university || "University not added"}
+                                                </p>
+                                            </div>
+                                        </div>
 
+                                        <div className="space-y-4 mb-6 pt-2 border-t border-slate-100">
+                                            <div>
+                                                <h3 className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-1.5">
+                                                    Can Teach
+                                                </h3>
+                                                <p className="text-xs text-slate-600 line-clamp-2">
+                                                    {profile.skills_can_teach || "No skills listed"}
+                                                </p>
+                                            </div>
 
+                                            <div>
+                                                <h3 className="text-[11px] font-bold uppercase tracking-wider text-teal-600 mb-1.5">
+                                                    Wants to Learn
+                                                </h3>
+                                                <p className="text-xs text-slate-600 line-clamp-2">
+                                                    {profile.skills_want_to_learn || "No skills listed"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={() => router.push(`/students/${profile.id}`)}
+                                        className="w-full rounded-xl bg-indigo-600 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
+                                    >
+                                        View Full Profile →
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
-
-
-            </div>
-
-
+            </main>
         </div>
-
     );
-
 }
-

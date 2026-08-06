@@ -145,6 +145,23 @@ export const getReceivedCollaborationRequests = async (
     return response.data;
 };
 
+export const getSentCollaborationRequests = async (
+    token: string
+) => {
+
+    const response = await api.get(
+        "collaborations/sent/",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    return response.data;
+};
+
+
 export const updateCollaborationRequest = async (
     requestId: number,
     status: string,

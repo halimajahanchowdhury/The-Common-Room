@@ -43,6 +43,21 @@ class ReceivedCollaborationRequestsView(generics.ListAPIView):
 
 
 
+# View collaboration requests sent by the logged-in user
+class SentCollaborationRequestsView(generics.ListAPIView):
+
+    serializer_class = CollaborationRequestSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+
+        return CollaborationRequest.objects.filter(
+            sender=self.request.user
+        ).order_by("-created_at")
+
+
+
+
 # Accept or Reject a collaboration request
 class UpdateCollaborationRequestView(generics.UpdateAPIView):
 

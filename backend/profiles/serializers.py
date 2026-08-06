@@ -12,6 +12,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "department",
             "semester",
             "bio",
+            "profile_picture",
             "skills_can_teach",
             "skills_want_to_learn",
         ]
