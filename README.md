@@ -313,13 +313,6 @@ These features are **not yet implemented** and represent planned enhancements:
 
 ---
 
-## 👥 Contributors
-
-- **Amatullah**
-- **Halima Jahan Chowdhury**
-
----
-
 ## 📄 License
 
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
