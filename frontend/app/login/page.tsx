@@ -20,10 +20,33 @@ export default function LoginPage() {
         const currentUsername = username.trim();
         const currentEmail = currentUsername.includes("@") ? currentUsername : `${currentUsername}@gmail.com`;
 
-        localStorage.clear();
+        // Preserve all_registered_students list while updating active session keys
+        const existingStudents = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
+        const foundStudent = existingStudents.find((s: any) => s.username === currentUsername || s.full_name === currentUsername);
+
         localStorage.setItem("user_name", currentUsername);
         localStorage.setItem("user_email", currentEmail);
         localStorage.setItem("access", "mock_access_token");
+
+        if (foundStudent) {
+            localStorage.setItem("user_profile", JSON.stringify(foundStudent));
+        } else {
+            const newStudent = {
+                id: Date.now(),
+                full_name: currentUsername,
+                username: currentUsername,
+                email: currentEmail,
+                university: "",
+                department: "",
+                skills_can_teach: "",
+                skills_want_to_learn: "",
+                bio: "",
+                profile_picture: null
+            };
+            existingStudents.push(newStudent);
+            localStorage.setItem("all_registered_students", JSON.stringify(existingStudents));
+            localStorage.setItem("user_profile", JSON.stringify(newStudent));
+        }
 
         window.location.href = "/dashboard";
     };

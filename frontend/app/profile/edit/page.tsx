@@ -66,10 +66,27 @@ export default function EditProfilePage() {
     };
 
     const saveProfile = async () => {
+        const username = localStorage.getItem("user_name") || profile.full_name || "Student";
         if (profile.full_name) {
             localStorage.setItem("user_name", profile.full_name);
         }
         localStorage.setItem("user_profile", JSON.stringify(profile));
+
+        const existing = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
+        let found = false;
+        const updatedList = existing.map((s: any) => {
+            if (s.username === username || s.full_name === username) {
+                found = true;
+                return { ...s, ...profile, username: s.username || username };
+            }
+            return s;
+        });
+
+        if (!found) {
+            updatedList.push({ ...profile, username, full_name: profile.full_name || username });
+        }
+
+        localStorage.setItem("all_registered_students", JSON.stringify(updatedList));
         setMessage("Profile updated successfully ✅");
     };
 

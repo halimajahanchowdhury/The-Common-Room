@@ -20,64 +20,95 @@ export default function StudentsPage() {
     const [profiles, setProfiles] = useState<any[]>([]);
     const [search, setSearch] = useState("");
     const [activePill, setActivePill] = useState("All");
+    const [sentRequests, setSentRequests] = useState<string[]>([]);
+    const [toastMessage, setToastMessage] = useState("");
 
     useEffect(() => {
         const storedName = localStorage.getItem("user_name") || "Student";
         const storedProfile = localStorage.getItem("user_profile");
-
-        if (storedProfile) {
-            try {
-                const parsed = JSON.parse(storedProfile);
-                setProfiles([{
-                    id: 1,
-                    full_name: parsed.full_name || storedName,
-                    university: parsed.university || "",
-                    department: parsed.department || "",
-                    skills_can_teach: parsed.skills_can_teach || "",
-                    skills_want_to_learn: parsed.skills_want_to_learn || "",
-                    profile_picture: parsed.profile_picture || null
-                }]);
-            } catch {
-                setProfiles([{
-                    id: 1,
-                    full_name: storedName,
-                    university: "",
-                    department: "",
-                    skills_can_teach: "",
-                    skills_want_to_learn: "",
-                    profile_picture: null
-                }]);
+        
+        let allRegistered: any[] = [];
+        try {
+            const parsed = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
+            if (Array.isArray(parsed)) {
+                allRegistered = parsed;
             }
-        } else {
-            setProfiles([{
-                id: 1,
-                full_name: storedName,
-                university: "",
-                department: "",
-                skills_can_teach: "",
-                skills_want_to_learn: "",
-                profile_picture: null
-            }]);
+        } catch {
+            allRegistered = [];
         }
+
+        let savedRequests: any[] = [];
+        try {
+            const parsedReqs = JSON.parse(localStorage.getItem("sent_requests") || "[]");
+            if (Array.isArray(parsedReqs)) savedRequests = parsedReqs;
+        } catch {
+            savedRequests = [];
+        }
+
+        setSentRequests(savedRequests.map((r: any) => r?.to_user).filter(Boolean));
+
+        // Filter out the active logged-in student so directory shows ONLY other registered peers
+        const currentNameLower = storedName.toLowerCase().trim();
+        const otherPeers = allRegistered.filter((s: any) => {
+            if (!s) return false;
+            const studentUsername = String(s.username || "").toLowerCase().trim();
+            const studentFullName = String(s.full_name || "").toLowerCase().trim();
+            return studentUsername !== currentNameLower && studentFullName !== currentNameLower;
+        });
+
+        setProfiles(otherPeers);
     }, []);
 
+    const handleSendRequest = (targetStudent: any) => {
+        const currentUser = localStorage.getItem("user_name") || "Student";
+        const targetName = targetStudent?.full_name || targetStudent?.username || "Student";
+
+        let existingRequests: any[] = [];
+        try {
+            const parsed = JSON.parse(localStorage.getItem("sent_requests") || "[]");
+            if (Array.isArray(parsed)) existingRequests = parsed;
+        } catch {
+            existingRequests = [];
+        }
+
+        const newRequest = {
+            id: Date.now(),
+            to_user: targetName,
+            from_user: currentUser,
+            skills: targetStudent?.skills_can_teach || "General Collaboration",
+            status: "Pending",
+            date: new Date().toLocaleDateString()
+        };
+
+        const updatedRequests = [...existingRequests, newRequest];
+        localStorage.setItem("sent_requests", JSON.stringify(updatedRequests));
+        setSentRequests(updatedRequests.map((r: any) => r?.to_user).filter(Boolean));
+
+        setToastMessage(`Collaboration request sent to ${targetName} successfully!`);
+        setTimeout(() => setToastMessage(""), 3000);
+    };
+
     const filteredProfiles = profiles.filter((profile) => {
-        const query = search.toLowerCase();
+        if (!profile) return false;
+        const query = search.toLowerCase().trim();
+
+        const nameStr = String(profile.full_name || profile.username || "").toLowerCase();
+        const uniStr = String(profile.university || "").toLowerCase();
+        const teachStr = String(profile.skills_can_teach || "").toLowerCase();
+        const learnStr = String(profile.skills_want_to_learn || "").toLowerCase();
 
         const matchesSearch =
-            profile.full_name?.toLowerCase().includes(query) ||
-            profile.university?.toLowerCase().includes(query) ||
-            profile.skills_can_teach?.toLowerCase().includes(query) ||
-            profile.skills_want_to_learn?.toLowerCase().includes(query);
+            nameStr.includes(query) ||
+            uniStr.includes(query) ||
+            teachStr.includes(query) ||
+            learnStr.includes(query);
 
         if (activePill === "All") {
             return matchesSearch;
         }
 
         const pillQuery = activePill.toLowerCase();
-        const matchesPill =
-            profile.skills_can_teach?.toLowerCase().includes(pillQuery) ||
-            profile.skills_want_to_learn?.toLowerCase().includes(pillQuery);
+        const matchesPill = teachStr.includes(pillQuery) || learnStr.includes(pillQuery);
 
         return matchesSearch && matchesPill;
     });
@@ -96,6 +127,12 @@ export default function StudentsPage() {
                         <p className="text-sm font-medium text-slate-500 mt-1">
                             Find study partners, skill exchangers, and collaborators across campus.
                         </p>
+
+                        {toastMessage && (
+                            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-bold text-emerald-800 shadow-xs">
+                                ✓ {toastMessage}
+                            </div>
+                        )}
                     </div>
 
                     {/* Search & Skill Filter Pills */}
@@ -130,8 +167,8 @@ export default function StudentsPage() {
                     </div>
 
                     {filteredProfiles.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400">
-                            No student profiles matching your search criteria.
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-xs font-semibold text-slate-400">
+                            No other student profiles matching your search criteria. When peer students sign up, they will appear here!
                         </div>
                     ) : (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -173,6 +210,25 @@ export default function StudentsPage() {
                                                 </p>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Action Button */}
+                                    <div className="mt-6 pt-4 border-t border-slate-100">
+                                        {sentRequests.includes(profile.full_name || profile.username) ? (
+                                            <button
+                                                disabled
+                                                className="w-full rounded-xl bg-emerald-50 border border-emerald-200 py-2.5 text-xs font-bold text-emerald-700 cursor-default flex items-center justify-center gap-1.5"
+                                            >
+                                                ✓ Request Sent
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleSendRequest(profile)}
+                                                className="w-full rounded-xl bg-indigo-600 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
+                                            >
+                                                Send Request
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
