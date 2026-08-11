@@ -37,37 +37,18 @@ export default function HomePage() {
                     </Link>
 
                     <div className="flex items-center gap-4">
-                        {isAuthenticated === true ? (
-                            <>
-                                <Link
-                                    href="/dashboard"
-                                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-600/30 hover:bg-indigo-500 transition"
-                                >
-                                    Dashboard
-                                </Link>
-                                <Link
-                                    href="/students"
-                                    className="text-sm font-medium text-slate-300 hover:text-indigo-400 px-3 py-2 transition"
-                                >
-                                    Browse Students
-                                </Link>
-                            </>
-                        ) : (
-                            <>
-                                <Link
-                                    href="/login"
-                                    className="text-sm font-medium text-slate-300 hover:text-indigo-400 px-3 py-2 transition"
-                                >
-                                    Sign In
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-600/30 hover:bg-indigo-500 transition"
-                                >
-                                    Sign Up
-                                </Link>
-                            </>
-                        )}
+                        <Link
+                            href="/login"
+                            className="text-sm font-medium text-slate-300 hover:text-indigo-400 px-3 py-2 transition"
+                        >
+                            Sign In
+                        </Link>
+                        <Link
+                            href="/register"
+                            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-600/30 hover:bg-indigo-500 transition"
+                        >
+                            Sign Up
+                        </Link>
                     </div>
                 </div>
             </header>
@@ -95,29 +76,18 @@ export default function HomePage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        {isAuthenticated === true ? (
-                            <Link
-                                href="/dashboard"
-                                className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition hover:-translate-y-0.5"
-                            >
-                                Go to Your Dashboard →
-                            </Link>
-                        ) : (
-                            <>
-                                <Link
-                                    href="/register"
-                                    className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition hover:-translate-y-0.5"
-                                >
-                                    Get Started Free
-                                </Link>
-                                <Link
-                                    href="/login"
-                                    className="w-full sm:w-auto rounded-xl border border-slate-700 bg-slate-800/80 px-8 py-4 text-base font-semibold text-slate-200 shadow-sm hover:bg-slate-800 hover:text-white transition hover:-translate-y-0.5"
-                                >
-                                    Sign In to Account
-                                </Link>
-                            </>
-                        )}
+                        <Link
+                            href="/register"
+                            className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 transition hover:-translate-y-0.5"
+                        >
+                            Get Started Free
+                        </Link>
+                        <Link
+                            href="/login"
+                            className="w-full sm:w-auto rounded-xl border border-slate-700 bg-slate-800/80 px-8 py-4 text-base font-semibold text-slate-200 shadow-sm hover:bg-slate-800 hover:text-white transition hover:-translate-y-0.5"
+                        >
+                            Sign In to Account
+                        </Link>
                     </div>
                 </section>
 

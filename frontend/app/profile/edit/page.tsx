@@ -22,24 +22,20 @@ export default function EditProfilePage() {
     const [message, setMessage] = useState("");
 
     useEffect(() => {
-        const token = localStorage.getItem("access");
+        const storedProfile = localStorage.getItem("user_profile");
+        const storedName = localStorage.getItem("user_name");
 
-        if (!token) {
-            console.log("No token found");
-            return;
+        if (storedProfile) {
+            try {
+                setProfile(JSON.parse(storedProfile));
+            } catch {
+                if (storedName) {
+                    setProfile((prev: any) => ({ ...prev, full_name: storedName }));
+                }
+            }
+        } else if (storedName) {
+            setProfile((prev: any) => ({ ...prev, full_name: storedName }));
         }
-
-        api.get("profiles/me/", {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then((response) => {
-                setProfile(response.data);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
     }, []);
 
     const handleChange = (
@@ -55,41 +51,26 @@ export default function EditProfilePage() {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setImageFile(file);
-            setImagePreview(URL.createObjectURL(file));
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                setImagePreview(base64String);
+                setProfile((prev: any) => ({
+                    ...prev,
+                    profile_picture: base64String
+                }));
+            };
+            reader.readAsDataURL(file);
         }
     };
 
     const saveProfile = async () => {
-        const token = localStorage.getItem("access");
-
-        const formData = new FormData();
-        formData.append("full_name", profile.full_name || "");
-        formData.append("university", profile.university || "");
-        formData.append("department", profile.department || "");
-        formData.append("semester", profile.semester || "");
-        formData.append("bio", profile.bio || "");
-        formData.append("skills_can_teach", profile.skills_can_teach || "");
-        formData.append("skills_want_to_learn", profile.skills_want_to_learn || "");
-
-        if (imageFile) {
-            formData.append("profile_picture", imageFile);
+        if (profile.full_name) {
+            localStorage.setItem("user_name", profile.full_name);
         }
-
-        try {
-            const response = await api.patch("profiles/me/", formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            setProfile(response.data);
-            setImagePreview(null);
-            setMessage("Profile updated successfully ✅");
-        } catch (error) {
-            console.error(error);
-            setMessage("Profile update failed ❌");
-        }
+        localStorage.setItem("user_profile", JSON.stringify(profile));
+        setMessage("Profile updated successfully ✅");
     };
 
     return (

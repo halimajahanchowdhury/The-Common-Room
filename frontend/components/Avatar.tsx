@@ -27,8 +27,8 @@ export default function Avatar({ src, name, username, size = "md" }: AvatarProps
     }[size];
 
     if (src) {
-        // Ensure standard URL format if relative media path
-        const imageUrl = src.startsWith("http") ? src : `http://127.0.0.1:8000${src}`;
+        // Ensure standard URL format if relative media path or base64 data URL
+        const imageUrl = (src.startsWith("http") || src.startsWith("data:")) ? src : `http://127.0.0.1:8000${src}`;
         return (
             <img
                 src={imageUrl}

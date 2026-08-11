@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllProfiles } from "../../services/auth";
-import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Avatar from "../../components/Avatar";
 
@@ -19,30 +17,48 @@ const POPULAR_SKILL_PILLS = [
 ];
 
 export default function StudentsPage() {
-    const router = useRouter();
-
     const [profiles, setProfiles] = useState<any[]>([]);
     const [search, setSearch] = useState("");
     const [activePill, setActivePill] = useState("All");
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem("access");
+        const storedName = localStorage.getItem("user_name") || "Student";
+        const storedProfile = localStorage.getItem("user_profile");
 
-        if (!token) {
-            window.location.href = "/login";
-            return;
+        if (storedProfile) {
+            try {
+                const parsed = JSON.parse(storedProfile);
+                setProfiles([{
+                    id: 1,
+                    full_name: parsed.full_name || storedName,
+                    university: parsed.university || "",
+                    department: parsed.department || "",
+                    skills_can_teach: parsed.skills_can_teach || "",
+                    skills_want_to_learn: parsed.skills_want_to_learn || "",
+                    profile_picture: parsed.profile_picture || null
+                }]);
+            } catch {
+                setProfiles([{
+                    id: 1,
+                    full_name: storedName,
+                    university: "",
+                    department: "",
+                    skills_can_teach: "",
+                    skills_want_to_learn: "",
+                    profile_picture: null
+                }]);
+            }
+        } else {
+            setProfiles([{
+                id: 1,
+                full_name: storedName,
+                university: "",
+                department: "",
+                skills_can_teach: "",
+                skills_want_to_learn: "",
+                profile_picture: null
+            }]);
         }
-
-        getAllProfiles(token)
-            .then((data) => {
-                setProfiles(data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error(error);
-                setLoading(false);
-            });
     }, []);
 
     const filteredProfiles = profiles.filter((profile) => {
@@ -113,11 +129,7 @@ export default function StudentsPage() {
                         </div>
                     </div>
 
-                    {loading ? (
-                        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-400">
-                            Loading student profiles...
-                        </div>
-                    ) : filteredProfiles.length === 0 ? (
+                    {filteredProfiles.length === 0 ? (
                         <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center text-slate-400">
                             No student profiles matching your search criteria.
                         </div>
@@ -142,7 +154,7 @@ export default function StudentsPage() {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-4 mb-6 pt-2 border-t border-slate-100">
+                                        <div className="space-y-4 pt-2 border-t border-slate-100">
                                             <div>
                                                 <h3 className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-1.5">
                                                     Can Teach
@@ -162,13 +174,6 @@ export default function StudentsPage() {
                                             </div>
                                         </div>
                                     </div>
-
-                                    <button
-                                        onClick={() => router.push(`/students/${profile.id}`)}
-                                        className="w-full rounded-xl bg-indigo-600 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
-                                    >
-                                        View Full Profile →
-                                    </button>
                                 </div>
                             ))}
                         </div>

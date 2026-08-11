@@ -12,15 +12,20 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        try {
-            const data = await loginUser(username, password);
-            localStorage.setItem("access", data.access);
-            localStorage.setItem("refresh", data.refresh);
-            window.location.href = "/dashboard";
-        } catch (error) {
-            console.error(error);
-            setMessage("❌ Login failed. Please check your credentials.");
+        if (!username.trim() || !password.trim()) {
+            setMessage("❌ Please enter both username and password.");
+            return;
         }
+
+        const currentUsername = username.trim();
+        const currentEmail = currentUsername.includes("@") ? currentUsername : `${currentUsername}@gmail.com`;
+
+        localStorage.clear();
+        localStorage.setItem("user_name", currentUsername);
+        localStorage.setItem("user_email", currentEmail);
+        localStorage.setItem("access", "mock_access_token");
+
+        window.location.href = "/dashboard";
     };
 
     return (
@@ -46,6 +51,7 @@ export default function LoginPage() {
                         <input
                             className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                             placeholder="Enter your username"
+                            required
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
@@ -59,6 +65,7 @@ export default function LoginPage() {
                             className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                             placeholder="••••••••"
                             type="password"
+                            required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />

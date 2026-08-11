@@ -13,16 +13,23 @@ export default function RegisterPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        try {
-            await registerUser(username, email, password);
-            setMessage("✅ Account created successfully! You can login now.");
-            setUsername("");
-            setEmail("");
-            setPassword("");
-        } catch (error) {
-            setMessage("❌ Registration failed. Please try again.");
-            console.error(error);
+        if (!username.trim() || !email.trim() || !password.trim()) {
+            setMessage("❌ Please fill out all required fields.");
+            return;
         }
+
+        const currentUsername = username.trim();
+        const currentEmail = email.trim();
+
+        localStorage.clear();
+        localStorage.setItem("user_name", currentUsername);
+        localStorage.setItem("user_email", currentEmail);
+        localStorage.setItem("access", "mock_access_token");
+
+        setMessage("✅ Account created successfully! Redirecting to Sign In...");
+        setTimeout(() => {
+            window.location.href = "/login";
+        }, 1000);
     };
 
     return (
@@ -33,7 +40,7 @@ export default function RegisterPage() {
                         The Common Room
                     </Link>
                     <h1 className="mt-3 text-2xl font-bold text-slate-900">
-                        Create Your Account
+                        Create an Account
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
                         Join the student learning network
@@ -48,6 +55,7 @@ export default function RegisterPage() {
                         <input
                             className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                             placeholder="Choose a username"
+                            required
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
@@ -61,6 +69,7 @@ export default function RegisterPage() {
                             className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                             placeholder="your.email@university.edu"
                             type="email"
+                            required
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -72,8 +81,9 @@ export default function RegisterPage() {
                         </label>
                         <input
                             className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
-                            placeholder="Create a strong password"
+                            placeholder="Create a password"
                             type="password"
+                            required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
