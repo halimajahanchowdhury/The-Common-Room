@@ -1,196 +1,318 @@
-# ☕︎ The Common Room
+﻿# ☕ The Common Room
 
 <div align="center">
 
 ### *Where Students Learn, Collaborate & Grow Together*
 
-![Status](https://img.shields.io/badge/Status-Early%20Development-orange?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?style=for-the-badge&logo=typescript)
-![Django](https://img.shields.io/badge/Backend-Django-darkgreen?style=for-the-badge&logo=django)
-![PostgreSQL](https://img.shields.io/badge/Database/PostgreSQL-blue?style=for-the-badge&logo=postgresql)
 ![TailwindCSS](https://img.shields.io/badge/UI-TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css)
-![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![Django](https://img.shields.io/badge/Backend-Django-darkgreen?style=for-the-badge&logo=django)
+![Django REST Framework](https://img.shields.io/badge/API-Django%20REST-A30000?style=for-the-badge&logo=django)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue?style=for-the-badge&logo=postgresql)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens)
 
 </div>
 
 ---
 
-# Project Overview
+## 📖 Project Description
 
-**The Common Room** is a full-stack student collaboration platform designed to help students connect academically and creatively in a shared digital environment.
+**The Common Room** is a collaborative student learning platform where students can create profiles, share skills, discover other students, send collaboration requests, and communicate through profile comments after becoming collaborators.
 
-Students often struggle to:
-- Find reliable study partners
-- Collaborate outside the classroom
-- Exchange skills and knowledge
-- Organize productive study sessions
-
-The platform aims to solve this by creating a space where students can:
-- Discover like-minded learners
-- Exchange academic or creative skills
-- Create collaboration posts
-- Communicate in real time
-- Schedule study sessions
-
-This project is being developed as a learning-focused full-stack application.
+The platform is designed to bridge the gap between students who have skills to teach and students who want to learn — helping them connect, collaborate, and grow together on campus.
 
 ---
 
-# Project Status
+## ✅ Features
 
-The Common Room is currently in the **early development phase**.
+### 🔐 Authentication
+- User registration
+- User login
+- JWT authentication (access & refresh tokens)
+- Protected routes (token-based access control)
 
-This project has recently been started as a full-stack student collaboration platform using Next.js and Django.
+### 👤 Profile System
+- View own profile
+- Edit profile (full name, university, department, semester, bio, skills)
+- View other students' profiles
+- Browse all registered students
 
-### Current Focus
-- Project setup & architecture design
-- Backend API development
-- Frontend UI structure
-- Authentication system planning
+### 🎓 Skill Exchange
+- **Skills I Can Teach** — list skills available to share
+- **Skills I Want to Learn** — list skills the student is seeking
+- **University** and **Department** fields
+- **Bio** — personal description
 
-### Planned Features
-- Student profiles
-- Skill exchange system
-- Study collaboration posts
-- Real-time chat
-- Study session scheduling
-- AI-based study partner matching
+### 🤝 Collaboration Requests
+- Send a collaboration request to another student
+- Receive collaboration requests from other students
+- Accept a collaboration request
+- Reject a collaboration request
+- Collaboration status display (None, Pending, Accepted, Rejected)
+- Prevent duplicate collaboration requests
+- Hide or disable the request button based on current collaboration status
 
-> ╰┈➤ This project is actively evolving, and features will be implemented step by step.
+### 💬 Comments
+- View profile comments on a student's profile page
+- Post a comment on a collaborator's profile
+- Only accepted collaborators can post comments (enforced on the backend)
 
----
-
-# Features
-
-## User Authentication
-- Secure signup and login system (planned)
-- JWT-based authentication (planned)
-
-## Student Profiles
-- Create and manage profiles (planned)
-- Add skills, interests, and goals
-
-## Skill Exchange System
-- Connect students based on skills (planned)
-- Peer-to-peer learning support
-
-## Study Collaboration Posts
-- Create study or project requests (planned)
-- Find collaborators easily
-
-## Real-Time Chat
-- Chat system for collaboration (planned)
-
-## Session Scheduling
-- Schedule study sessions (planned)
-
-## Responsive UI
-- Modern and mobile-friendly interface (in progress)
-
-## Secure Backend API
-- REST API using Django REST Framework (in progress)
+### 🖥️ Frontend Pages
+- **Homepage** (`/`) — Landing page with smart redirect (sign in / go to dashboard based on auth state)
+- **Login** (`/login`) — User login page
+- **Register** (`/register`) — User registration page
+- **Dashboard** (`/dashboard`) — Logged-in user's hub with profile info and received collaboration requests
+- **Browse Students** (`/students`) — Browse all registered student profiles
+- **Student Profile Page** (`/students/[id]`) — View a specific student's profile, skills, bio, collaboration controls, and comments
+- **Edit Profile** (`/profile/edit`) — Edit the authenticated user's own profile
+- **Navigation Bar** — Persistent navbar across authenticated pages with links to Dashboard, Browse Students, My Profile, and Logout
 
 ---
 
-# Tech Stack
+## 🛠️ Tech Stack
 
-## Frontend
-- Next.js
-- TypeScript
-- Tailwind CSS
+### Frontend
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
 
-## Backend
-- Django
-- Django REST Framework
+### Backend
+- **Framework**: Django
+- **API Framework**: Django REST Framework
 
-## Database
-- PostgreSQL
+### Database
+- **Engine**: PostgreSQL
 
-## Other Tools
-- Git & GitHub
-- JWT Authentication (planned)
+### Authentication
+- Django's built-in `User` model
+- JWT via `djangorestframework-simplejwt`
 
 ---
 
-# Folder Structure
+## 📁 Project Structure
 
-```bash
+```text
 TheCommonRoom/
 ├── backend/
-│   ├── api/
-│   ├── users/
-│   ├── collaboration/
-│   └── manage.py
+│   ├── accounts/          # User registration, login, current user endpoint
+│   ├── profiles/          # Student profile management (CRUD)
+│   ├── collaborations/    # Collaboration request system
+│   ├── posts/             # Profile comments system
+│   ├── chat/              # Chat app (scaffolded, not yet fully implemented)
+│   ├── study_sessions/    # Study sessions app (scaffolded, not yet fully implemented)
+│   └── config/            # Django project settings and root URL configuration
 │
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   ├── pages/
-│   └── public/
-│
-└── README.md
+└── frontend/
+    ├── app/               # Next.js App Router pages
+    │   ├── page.tsx           # Homepage with auth-aware landing
+    │   ├── dashboard/         # Dashboard page
+    │   ├── login/             # Login page
+    │   ├── register/          # Registration page
+    │   ├── profile/edit/      # Edit profile page
+    │   └── students/
+    │       ├── page.tsx       # Browse all students
+    │       └── [id]/          # Individual student profile page
+    ├── components/
+    │   ├── Navbar.tsx         # Persistent navigation bar
+    │   └── Avatar.tsx         # Avatar/initials component
+    └── services/
+        ├── api.ts             # Axios instance with base URL
+        └── auth.ts            # Auth API calls (login, register, profile, collaborations, comments)
 ```
 
 ---
 
-# API Overview
+## 🗃️ Database Overview
 
-The backend is built using **Django REST Framework** with RESTful APIs and planned JWT authentication.
+| Model | App | Description |
+|---|---|---|
+| `User` | Django built-in | Core authentication model (username, email, password) |
+| `Profile` | `profiles` | Extends `User` with full name, university, department, semester, bio, skills |
+| `CollaborationRequest` | `collaborations` | Tracks requests between two users with a status: `pending`, `accepted`, or `rejected` |
+| `Comment` | `posts` | A comment posted by a `User` on another user's `Profile` |
 
-### Example Endpoints
-```http
-POST /api/auth/register/
-POST /api/auth/login/
-GET  /api/profile/
-POST /api/posts/
-GET  /api/posts/
+### Relationships
+- Each `User` has exactly one `Profile` (OneToOne).
+- A `CollaborationRequest` links a **sender** and a **receiver** (both `User` FK).
+- A `Comment` links an **author** (`User` FK) to a **profile** (`Profile` FK).
+- Comments can only be created if the collaboration between the author and the profile owner is `accepted` (enforced in the backend view).
+
+---
+
+## 🔌 API Overview
+
+All API routes are prefixed with `/api/`.
+
+### Authentication
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/token/` | POST | Obtain JWT access & refresh tokens (login) |
+| `/api/token/refresh/` | POST | Refresh an access token |
+| `/api/accounts/register/` | POST | Register a new user |
+| `/api/accounts/me/` | GET | Get the currently authenticated user |
+
+### Profiles
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/profiles/` | GET | List all student profiles |
+| `/api/profiles/me/` | GET / PUT | View or update the current user's profile |
+| `/api/profiles/<id>/` | GET | View a specific student's profile |
+
+### Collaboration Requests
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/collaborations/create/` | POST | Send a collaboration request |
+| `/api/collaborations/received/` | GET | View received collaboration requests |
+| `/api/collaborations/sent/` | GET | View sent collaboration requests |
+| `/api/collaborations/status/<user_id>/` | GET | Check collaboration status with a specific user |
+| `/api/collaborations/<id>/` | PATCH | Accept or reject a collaboration request |
+
+### Comments
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/posts/create/` | POST | Post a comment on a profile (collaborators only) |
+| `/api/posts/profile/<profile_id>/` | GET | Retrieve all comments on a specific profile |
+
+---
+
+## ⚙️ Installation
+
+### Prerequisites
+- Python 3.10+
+- Node.js 18+
+- PostgreSQL
+
+---
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   ```
+
+3. Activate the virtual environment:
+   - **Windows:**
+     ```cmd
+     venv\Scripts\activate
+     ```
+   - **macOS / Linux:**
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+5. Configure PostgreSQL — open `backend/config/settings.py` and update the `DATABASES` block with your local PostgreSQL credentials:
+   ```python
+   DATABASES = {
+       "default": {
+           "ENGINE": "django.db.backends.postgresql",
+           "NAME": "your_db_name",
+           "USER": "your_db_user",
+           "PASSWORD": "your_db_password",
+           "HOST": "localhost",
+           "PORT": "5432",
+       }
+   }
+   ```
+
+6. Apply database migrations:
+   ```bash
+   python manage.py migrate
+   ```
+
+7. (Optional) Create a superuser for the Django admin panel:
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+8. Start the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+---
+
+### Frontend Setup
+
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+
+2. Install packages:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+---
+
+## 🚀 Running the Project
+
+Start both servers concurrently in separate terminals.
+
+**Backend:**
+```bash
+python manage.py runserver
 ```
+> Runs at: `http://localhost:8000/`
+
+**Frontend:**
+```bash
+npm run dev
+```
+> Runs at: `http://localhost:3000/`
+
+The frontend communicates with the backend via the REST API on port `8000`. Ensure both servers are running simultaneously for the application to function correctly.
 
 ---
 
-# Development Roadmap
+## 📸 Screenshots
 
-- [x] Project setup
-- [ ] Authentication system
-- [ ] Student profiles
-- [ ] Collaboration posts
-- [ ] Real-time chat
-- [ ] Session scheduling
-- [ ] AI matching system
-- [ ] Deployment
+> Screenshots to be added upon final UI completion.
 
----
-
-# Screenshots
-
-> Screenshots will be added as the project progresses.
-
-- Landing Page
-- Dashboard
-- Collaboration Feed
-- Chat Interface
+| Page | Description |
+|---|---|
+| Login | User login form |
+| Register | New user registration form |
+| Dashboard | Logged-in user's profile summary and incoming collaboration requests |
+| Browse Students | Grid/list of all registered student profiles |
+| Student Profile | Individual profile with skills, bio, collaboration controls, and comments |
+| Edit Profile | Editable form for updating your own profile |
+| Collaboration Requests | Accept or reject incoming requests directly from the dashboard |
+| Comments Section | Post and view comments on a collaborator's profile |
 
 ---
 
-# Future Improvements
+## 🔮 Future Improvements
 
-- AI-based study partner matching
-- Group study rooms
-- Notifications system
-- Video call integration
-- Study progress tracking
-- Deployment with Docker & CI/CD
+These features are **not yet implemented** and represent planned enhancements:
 
----
-
-# 
-
-ᵎᵎ This is an early-stage academic project, but suggestions are welcome.
+- 💬 **Real-time chat** between accepted collaborators
+- 🔔 **Notifications** for new collaboration requests and comments
+- 🔍 **Search and filtering** on the Browse Students page (by skill, university, department)
+- 🖼️ **Profile picture upload** support
+- 📅 **Study sessions** scheduling between collaborators
+- 📱 **Responsive mobile improvements**
+- ☁️ **Deployment** to a cloud platform (e.g., Render, Vercel, Railway)
 
 ---
-<div align="center">
 
-### ⓘ Built as a learning-focused full-stack project
+## 📄 License
 
-</div>
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).
