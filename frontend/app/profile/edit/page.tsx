@@ -5,7 +5,7 @@ import api from "../../../services/api";
 import Navbar from "../../../components/Navbar";
 import Avatar from "../../../components/Avatar";
 
-import { getProfile, updateProfile } from "../../../services/auth";
+import { getProfile, updateProfile, resetPassword } from "../../../services/auth";
 
 export default function EditProfilePage() {
     const [profile, setProfile] = useState<any>({
@@ -34,7 +34,7 @@ export default function EditProfilePage() {
         });
     };
 
-    const handleChangePasswordSubmit = (e: React.FormEvent) => {
+    const handleChangePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!passwords.currentPassword.trim() || !passwords.newPassword.trim() || !passwords.confirmPassword.trim()) {
@@ -49,48 +49,21 @@ export default function EditProfilePage() {
             return;
         }
 
-        const storedUsername = localStorage.getItem("user_name") || "Student";
-        const currentNameLower = storedUsername.toLowerCase().trim();
-
-        let allStudents: any[] = [];
-        try {
-            const parsed = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
-            if (Array.isArray(parsed)) allStudents = parsed;
-        } catch {
-            allStudents = [];
+        const storedUsername = localStorage.getItem("user_name") || "";
+        if (!storedUsername) {
+            setPasswordMessage("❌ User session not found. Please sign in again.");
+            setIsPasswordSuccess(false);
+            return;
         }
 
-        const foundIndex = allStudents.findIndex((s: any) => 
-            s && (
-                String(s.username || "").toLowerCase().trim() === currentNameLower ||
-                String(s.full_name || "").toLowerCase().trim() === currentNameLower
-            )
-        );
-
-        if (foundIndex !== -1) {
-            const currentStoredPass = allStudents[foundIndex].password || "123";
-            if (passwords.currentPassword.trim() !== currentStoredPass) {
-                setPasswordMessage("❌ Current password is incorrect.");
-                setIsPasswordSuccess(false);
-                return;
-            }
-
-            allStudents[foundIndex].password = passwords.newPassword.trim();
-            localStorage.setItem("all_registered_students", JSON.stringify(allStudents));
-
-            try {
-                const activeProfile = JSON.parse(localStorage.getItem("user_profile") || "{}");
-                activeProfile.password = passwords.newPassword.trim();
-                localStorage.setItem("user_profile", JSON.stringify(activeProfile));
-            } catch {
-                // Ignore
-            }
-
+        try {
+            await resetPassword(storedUsername, passwords.newPassword.trim());
             setPasswordMessage("✅ Password changed successfully!");
             setIsPasswordSuccess(true);
             setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        } else {
-            setPasswordMessage("❌ Account record not found.");
+        } catch (err: any) {
+            console.error("Password update error:", err);
+            setPasswordMessage(err?.response?.data?.error || "❌ Failed to update password.");
             setIsPasswordSuccess(false);
         }
     };
@@ -149,12 +122,39 @@ export default function EditProfilePage() {
 
             const reader = new FileReader();
             reader.onloadend = () => {
-                const base64String = reader.result as string;
-                setImagePreview(base64String);
-                setProfile((prev: any) => ({
-                    ...prev,
-                    profile_picture: base64String
-                }));
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const maxDim = 300;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        }
+                    } else {
+                        if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext("2d");
+                    if (ctx) {
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+                        setImagePreview(compressedBase64);
+                        setProfile((prev: any) => ({
+                            ...prev,
+                            profile_picture: compressedBase64
+                        }));
+                    }
+                };
+                img.src = reader.result as string;
             };
             reader.readAsDataURL(file);
         }
@@ -165,50 +165,46 @@ export default function EditProfilePage() {
 
         if (token) {
             try {
-                const updatedData = await updateProfile({
-                    full_name: profile.full_name,
-                    university: profile.university,
-                    department: profile.department,
-                    semester: profile.semester,
-                    bio: profile.bio,
-                    skills_can_teach: profile.skills_can_teach,
-                    skills_want_to_learn: profile.skills_want_to_learn,
-                    profile_picture: profile.profile_picture,
-                }, token);
+                const payload: any = {
+                    full_name: profile.full_name || "",
+                    university: profile.university || "",
+                    department: profile.department || "",
+                    semester: profile.semester || "",
+                    bio: profile.bio || "",
+                    skills_can_teach: profile.skills_can_teach || "",
+                    skills_want_to_learn: profile.skills_want_to_learn || "",
+                };
+
+                if (profile.profile_picture) {
+                    payload.profile_picture = profile.profile_picture;
+                }
+
+                const updatedData = await updateProfile(payload, token);
+
+                if (updatedData && updatedData.error) {
+                    const errors = updatedData.error;
+                    if (typeof errors === "object") {
+                        const firstKey = Object.keys(errors)[0];
+                        const firstVal = Array.isArray(errors[firstKey]) ? errors[firstKey][0] : errors[firstKey];
+                        setMessage(`❌ ${firstKey}: ${firstVal}`);
+                    } else {
+                        setMessage("❌ Failed to save profile on server.");
+                    }
+                    return;
+                }
 
                 setProfile((prev: any) => ({ ...prev, ...updatedData }));
                 localStorage.setItem("user_profile", JSON.stringify(updatedData));
-                if (updatedData.full_name) {
-                    localStorage.setItem("user_name", updatedData.full_name);
-                }
                 setMessage("Profile updated successfully ✅");
                 return;
-            } catch (err) {
+            } catch (err: any) {
                 console.error("Failed to update profile via API:", err);
+                setMessage("❌ Failed to save profile on server.");
+                return;
             }
         }
 
-        const username = localStorage.getItem("user_name") || profile.full_name || "Student";
-        if (profile.full_name) {
-            localStorage.setItem("user_name", profile.full_name);
-        }
         localStorage.setItem("user_profile", JSON.stringify(profile));
-
-        const existing = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
-        let found = false;
-        const updatedList = existing.map((s: any) => {
-            if (s.username === username || s.full_name === username) {
-                found = true;
-                return { ...s, ...profile, username: s.username || username };
-            }
-            return s;
-        });
-
-        if (!found) {
-            updatedList.push({ ...profile, username, full_name: profile.full_name || username });
-        }
-
-        localStorage.setItem("all_registered_students", JSON.stringify(updatedList));
         setMessage("Profile updated successfully ✅");
     };
 

@@ -32,6 +32,11 @@ export default function LoginPage() {
             }
 
             if (tokenData && tokenData.access) {
+                // Clear stale cache from previous sessions
+                localStorage.removeItem("user_profile");
+                localStorage.removeItem("all_registered_students");
+                localStorage.removeItem("sent_requests");
+
                 localStorage.setItem("access", tokenData.access);
                 if (tokenData.refresh) {
                     localStorage.setItem("refresh", tokenData.refresh);
@@ -98,6 +103,12 @@ export default function LoginPage() {
                             <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                                 Password
                             </label>
+                            <Link
+                                href="/forgot-password"
+                                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                            >
+                                Forgot Password?
+                            </Link>
                         </div>
                         <input
                             className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"

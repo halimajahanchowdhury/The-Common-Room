@@ -116,27 +116,33 @@ function ChatContent() {
         }
     }, [peerParam]);
 
-    // Load messages from Django API
+    // Load messages from Django API with live polling
     useEffect(() => {
         if (!currentUser || !activePeer) return;
 
-        const token = localStorage.getItem("access");
-        const peerIdentifier = activePeer.username || activePeer.full_name;
+        const fetchMessages = () => {
+            const token = localStorage.getItem("access");
+            const peerIdentifier = activePeer.username || activePeer.full_name;
 
-        if (token && peerIdentifier) {
-            getChatMessages(peerIdentifier, token)
-                .then((data) => {
-                    if (Array.isArray(data)) {
-                        setMessages(data);
-                    } else {
-                        loadLocalMessages();
-                    }
-                })
-                .catch(() => loadLocalMessages());
-            return;
-        }
+            if (token && peerIdentifier) {
+                getChatMessages(peerIdentifier, token)
+                    .then((data) => {
+                        if (Array.isArray(data)) {
+                            setMessages(data);
+                        } else {
+                            loadLocalMessages();
+                        }
+                    })
+                    .catch(() => loadLocalMessages());
+                return;
+            }
 
-        loadLocalMessages();
+            loadLocalMessages();
+        };
+
+        fetchMessages();
+        const intervalId = setInterval(fetchMessages, 3000);
+        return () => clearInterval(intervalId);
     }, [currentUser, activePeer]);
 
     const loadLocalMessages = () => {

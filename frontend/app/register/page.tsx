@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { registerUser, loginUser, getProfile } from "../../services/auth";
+import { registerUser } from "../../services/auth";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState("");
@@ -24,41 +24,10 @@ export default function RegisterPage() {
 
         try {
             // 1. Register student account via Django REST API
-            await registerUser(username.trim(), email.trim(), password.trim());
+            const result = await registerUser(username.trim(), email.trim(), password.trim());
 
-            // 2. Automatically obtain JWT tokens
-            const tokenData = await loginUser(username.trim(), password.trim());
-
-            if (tokenData && tokenData.access) {
-                localStorage.setItem("access", tokenData.access);
-                if (tokenData.refresh) {
-                    localStorage.setItem("refresh", tokenData.refresh);
-                }
-                localStorage.setItem("user_name", username.trim());
-
-                try {
-                    const profile = await getProfile(tokenData.access);
-                    if (profile) {
-                        localStorage.setItem("user_profile", JSON.stringify(profile));
-                    }
-                } catch {
-                    // Profile fetch fallback
-                }
-
-                setMessage("✅ Account created successfully! Redirecting to Dashboard...");
-                setTimeout(() => {
-                    window.location.href = "/dashboard";
-                }, 800);
-            } else {
-                setMessage("✅ Account created! Redirecting to Sign In...");
-                setTimeout(() => {
-                    window.location.href = "/login";
-                }, 1000);
-            }
-        } catch (err: any) {
-            console.error("Registration Error:", err);
-            if (err?.response?.data) {
-                const errors = err.response.data;
+            if (result && result.error) {
+                const errors = result.error;
                 if (typeof errors === "object") {
                     const firstKey = Object.keys(errors)[0];
                     const firstVal = Array.isArray(errors[firstKey]) ? errors[firstKey][0] : errors[firstKey];
@@ -66,9 +35,17 @@ export default function RegisterPage() {
                 } else {
                     setMessage("❌ Registration failed. Username or email may already be taken.");
                 }
-            } else {
-                setMessage("❌ Unable to connect to server. Please try again.");
+                setLoading(false);
+                return;
             }
+
+            setMessage("✅ Account created successfully! Redirecting to Sign In...");
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 1000);
+        } catch (err: any) {
+            console.error("Registration Error:", err);
+            setMessage("❌ Unable to complete registration. Please try again.");
         } finally {
             setLoading(false);
         }

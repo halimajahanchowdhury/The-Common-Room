@@ -71,9 +71,10 @@ export default function StudentProfilePage() {
         try {
             await sendCollaborationRequest(id, token);
             setMessage("Collaboration request sent successfully!");
-        } catch (error) {
+            setCollaborationStatus("pending");
+        } catch (error: any) {
             console.error(error);
-            setMessage("Something went wrong.");
+            setMessage(error?.response?.data?.error || "Failed to send collaboration request.");
         }
     };
 

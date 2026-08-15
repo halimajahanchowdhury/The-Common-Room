@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "../../components/Navbar";
 import Avatar from "../../components/Avatar";
 import {
+    getProfile,
     getSentCollaborationRequests,
     getReceivedCollaborationRequests,
     updateCollaborationRequest,
@@ -83,11 +84,32 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
+        const token = localStorage.getItem("access");
         const storedName = localStorage.getItem("user_name") || "Student";
-        const storedEmail = localStorage.getItem("user_email") || `${storedName}@gmail.com`;
-        const storedProfile = localStorage.getItem("user_profile");
 
         loadRequests(storedName);
+
+        if (token) {
+            getProfile(token)
+                .then((data) => {
+                    if (data) {
+                        setProfile(data);
+                        setUser({
+                            username: data.username || storedName,
+                            email: data.email || ""
+                        });
+                        localStorage.setItem("user_profile", JSON.stringify(data));
+                    }
+                })
+                .catch(() => loadLocalDashboard(storedName));
+        } else {
+            loadLocalDashboard(storedName);
+        }
+    }, []);
+
+    const loadLocalDashboard = (storedName: string) => {
+        const storedEmail = localStorage.getItem("user_email") || `${storedName}@gmail.com`;
+        const storedProfile = localStorage.getItem("user_profile");
 
         setUser({
             username: storedName,
@@ -107,13 +129,8 @@ export default function DashboardPage() {
                     full_name: storedName
                 }));
             }
-        } else {
-            setProfile((prev: any) => ({
-                ...prev,
-                full_name: storedName
-            }));
         }
-    }, []);
+    };
 
     const handleUpdateRequestStatus = async (requestId: number, newStatus: string) => {
         const token = localStorage.getItem("access");
@@ -193,7 +210,7 @@ export default function DashboardPage() {
                                     {profile?.full_name || user.username}
                                 </h1>
                                 <p className="text-xs font-medium text-slate-500 mt-0.5">
-                                    @{user.username} • {user.email} • {profile?.university} ({profile?.department})
+                                    @{profile?.username || user.username} • {profile?.email || user.email} {profile?.university ? `• ${profile.university}` : ""} {profile?.department ? `(${profile.department})` : ""}
                                 </p>
                             </div>
                         </div>
@@ -285,16 +302,16 @@ export default function DashboardPage() {
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2 self-start sm:self-auto">
-                                            {req.status === "Pending" ? (
+                                            {String(req.status || "").toLowerCase() === "pending" ? (
                                                 <>
                                                     <button
-                                                        onClick={() => handleUpdateRequestStatus(req.id, "Accepted")}
+                                                        onClick={() => handleUpdateRequestStatus(req.id, "accepted")}
                                                         className="rounded-xl bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition"
                                                     >
                                                         Accept ✅
                                                     </button>
                                                     <button
-                                                        onClick={() => handleUpdateRequestStatus(req.id, "Declined")}
+                                                        onClick={() => handleUpdateRequestStatus(req.id, "declined")}
                                                         className="rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
                                                     >
                                                         Decline ❌
@@ -304,14 +321,14 @@ export default function DashboardPage() {
                                                 <div className="flex items-center gap-2">
                                                     <span
                                                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-                                                            req.status === "Accepted"
+                                                            String(req.status || "").toLowerCase() === "accepted"
                                                                 ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
                                                                 : "bg-rose-50 border border-rose-200 text-rose-700"
                                                         }`}
                                                     >
-                                                        {req.status === "Accepted" ? "Accepted ✅" : "Declined ❌"}
+                                                        {String(req.status || "").toLowerCase() === "accepted" ? "Accepted ✅" : "Declined ❌"}
                                                     </span>
-                                                    {req.status === "Accepted" && (
+                                                    {String(req.status || "").toLowerCase() === "accepted" && (
                                                         <Link
                                                             href={`/chat?peer=${encodeURIComponent(req.from_username || req.from_user)}`}
                                                             className="rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition"
@@ -350,43 +367,46 @@ export default function DashboardPage() {
                             </div>
                         ) : (
                             <div className="divide-y divide-slate-100">
-                                {sentRequests.map((req: any, index: number) => (
-                                    <div key={index} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                        <div>
-                                            <h4 className="font-bold text-slate-900 text-sm">
-                                                Request sent to: {req.to_user}
-                                            </h4>
-                                            <p className="text-xs text-slate-500 mt-0.5">
-                                                Skill Focus: <span className="font-semibold text-indigo-600">{req.skills}</span> • Sent on {req.date}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-2 self-start sm:self-auto">
-                                            <span
-                                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-                                                    req.status === "Accepted"
-                                                        ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
-                                                        : req.status === "Declined"
-                                                        ? "bg-rose-50 border border-rose-200 text-rose-700"
-                                                        : "bg-amber-50 border border-amber-200 text-amber-700"
-                                                }`}
-                                            >
-                                                {req.status === "Accepted"
-                                                    ? "Accepted ✅"
-                                                    : req.status === "Declined"
-                                                    ? "Declined ❌"
-                                                    : "Pending ⏳"}
-                                            </span>
-                                            {req.status === "Accepted" && (
-                                                <Link
-                                                    href={`/chat?peer=${encodeURIComponent(req.to_username || req.to_user)}`}
-                                                    className="rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition"
+                                {sentRequests.map((req: any, index: number) => {
+                                    const sLower = String(req.status || "").toLowerCase();
+                                    return (
+                                        <div key={index} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                            <div>
+                                                <h4 className="font-bold text-slate-900 text-sm">
+                                                    Request sent to: {req.to_user || req.to_username}
+                                                </h4>
+                                                <p className="text-xs text-slate-500 mt-0.5">
+                                                    Skill Focus: <span className="font-semibold text-indigo-600">{req.skills || "General Collaboration"}</span>
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-2 self-start sm:self-auto">
+                                                <span
+                                                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                                                        sLower === "accepted"
+                                                            ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                                                            : sLower === "declined" || sLower === "rejected"
+                                                            ? "bg-rose-50 border border-rose-200 text-rose-700"
+                                                            : "bg-amber-50 border border-amber-200 text-amber-700"
+                                                    }`}
                                                 >
-                                                    Send a Message 💬
-                                                </Link>
-                                            )}
+                                                    {sLower === "accepted"
+                                                        ? "Accepted ✅"
+                                                        : sLower === "declined" || sLower === "rejected"
+                                                        ? "Declined ❌"
+                                                        : "Pending ⏳"}
+                                                </span>
+                                                {sLower === "accepted" && (
+                                                    <Link
+                                                        href={`/chat?peer=${encodeURIComponent(req.to_username || req.to_user)}`}
+                                                        className="rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition"
+                                                    >
+                                                        Send a Message 💬
+                                                    </Link>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

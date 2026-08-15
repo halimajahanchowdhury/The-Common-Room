@@ -6,16 +6,29 @@ export const registerUser = async (
     email: string,
     password: string
 ) => {
-
-    const response = await api.post(
-        "accounts/register/",
-        {
-            username,
-            email,
-            password,
+    try {
+        const response = await api.post(
+            "accounts/register/",
+            {
+                username,
+                email,
+                password,
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        if (error?.response?.data) {
+            return { error: error.response.data };
         }
-    );
+        return { error: { detail: "Registration failed. Please check your details." } };
+    }
+};
 
+export const resetPassword = async (identity: string, newPassword: string) => {
+    const response = await api.post("accounts/password_reset/", {
+        identity,
+        new_password: newPassword,
+    });
     return response.data;
 };
 
@@ -305,16 +318,23 @@ export const updateProfile = async (
     data: any,
     token: string
 ) => {
-    const response = await api.put(
-        "profiles/me/",
-        data,
-        {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+    try {
+        const response = await api.put(
+            "profiles/me/",
+            data,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        if (error?.response?.data) {
+            return { error: error.response.data };
         }
-    );
-    return response.data;
+        return { error: { detail: "Failed to update profile." } };
+    }
 };
 
 export const getPosts = async (token: string) => {
