@@ -2,77 +2,90 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { loginUser } from "../../services/auth";
+import { loginUser, getProfile } from "../../services/auth";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setMessage("");
 
         if (!username.trim() || !password.trim()) {
             setMessage("❌ Please enter both username and password.");
             return;
         }
 
-        const currentUsername = username.trim();
-        const currentEmail = currentUsername.includes("@") ? currentUsername : `${currentUsername}@gmail.com`;
+        setLoading(true);
 
-        // Preserve all_registered_students list while updating active session keys
-        const existingStudents = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
-        const foundStudent = existingStudents.find((s: any) => s.username === currentUsername || s.full_name === currentUsername);
+        try {
+            // 1. Obtain real JWT access and refresh tokens from Django API
+            const tokenData = await loginUser(username.trim(), password.trim());
 
-        localStorage.setItem("user_name", currentUsername);
-        localStorage.setItem("user_email", currentEmail);
-        localStorage.setItem("access", "mock_access_token");
+            if (tokenData && tokenData.error) {
+                setMessage(`❌ ${tokenData.error}`);
+                setLoading(false);
+                return;
+            }
 
-        if (foundStudent) {
-            localStorage.setItem("user_profile", JSON.stringify(foundStudent));
-        } else {
-            const newStudent = {
-                id: Date.now(),
-                full_name: currentUsername,
-                username: currentUsername,
-                email: currentEmail,
-                university: "",
-                department: "",
-                skills_can_teach: "",
-                skills_want_to_learn: "",
-                bio: "",
-                profile_picture: null
-            };
-            existingStudents.push(newStudent);
-            localStorage.setItem("all_registered_students", JSON.stringify(existingStudents));
-            localStorage.setItem("user_profile", JSON.stringify(newStudent));
+            if (tokenData && tokenData.access) {
+                localStorage.setItem("access", tokenData.access);
+                if (tokenData.refresh) {
+                    localStorage.setItem("refresh", tokenData.refresh);
+                }
+                localStorage.setItem("user_name", username.trim());
+
+                // 2. Retrieve student profile from Django backend
+                try {
+                    const profile = await getProfile(tokenData.access);
+                    if (profile) {
+                        localStorage.setItem("user_profile", JSON.stringify(profile));
+                        if (profile.full_name) {
+                            localStorage.setItem("user_name", profile.full_name);
+                        }
+                    }
+                } catch {
+                    // Profile fetch optional fallback
+                }
+
+                // 3. Redirect to Dashboard with authentic JWT session
+                window.location.href = "/dashboard";
+            } else {
+                setMessage("❌ Invalid username or password.");
+            }
+        } catch (err: any) {
+            console.error("Login Error:", err);
+            setMessage("❌ Invalid username or password. Please try again.");
+        } finally {
+            setLoading(false);
         }
-
-        window.location.href = "/dashboard";
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-800 p-6">
-            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 p-6 transition-colors">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-sm">
                 <div className="text-center mb-8">
-                    <Link href="/" className="text-2xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                    <Link href="/" className="text-2xl font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
                         The Common Room
                     </Link>
-                    <h1 className="mt-3 text-2xl font-bold text-slate-900">
+                    <h1 className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">
                         Welcome Back
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Sign in to access your student dashboard
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                        Sign in with your Django account
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
                             Username
                         </label>
                         <input
-                            className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                             placeholder="Enter your username"
                             required
                             value={username}
@@ -81,11 +94,13 @@ export default function LoginPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
-                            Password
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                                Password
+                            </label>
+                        </div>
                         <input
-                            className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                            className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                             placeholder="••••••••"
                             type="password"
                             required
@@ -95,22 +110,23 @@ export default function LoginPage() {
                     </div>
 
                     <button
-                        className="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-700 transition"
+                        className="w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-xs hover:bg-indigo-500 transition disabled:opacity-50 cursor-pointer"
                         type="submit"
+                        disabled={loading}
                     >
-                        Sign In
+                        {loading ? "Signing In..." : "Sign In"}
                     </button>
                 </form>
 
                 {message && (
-                    <p className="mt-4 text-center text-sm font-medium text-rose-600">
+                    <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/40 p-3 text-center text-xs font-semibold text-rose-600 dark:text-rose-400">
                         {message}
-                    </p>
+                    </div>
                 )}
 
-                <p className="mt-6 text-center text-sm text-slate-500">
-                    Don't have an account?{" "}
-                    <Link href="/register" className="font-semibold text-indigo-600 hover:text-indigo-700 hover:underline">
+                <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                    Don&apos;t have an account?{" "}
+                    <Link href="/register" className="font-bold text-indigo-600 dark:text-indigo-400 hover:underline">
                         Sign Up
                     </Link>
                 </p>

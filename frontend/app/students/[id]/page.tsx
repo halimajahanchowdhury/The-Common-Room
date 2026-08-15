@@ -144,24 +144,78 @@ export default function StudentProfilePage() {
                         </div>
                     </div>
 
-                    {/* Details */}
+                    {/* Details & Skills Exchange */}
                     <div className="py-6 space-y-6 border-b border-slate-100">
+                        {/* Skill Match Highlight */}
+                        {profile.skill_matches?.has_match && (
+                            <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 shadow-2xs">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="text-lg">⚡</span>
+                                    <h3 className="font-extrabold text-xs uppercase tracking-wider text-emerald-800">
+                                        Potential Skill Exchange Match!
+                                    </h3>
+                                </div>
+                                <div className="space-y-1.5 text-xs text-emerald-900">
+                                    {profile.skill_matches.can_learn_from_peer?.map((skill: string, idx: number) => (
+                                        <div key={`learn-${idx}`} className="flex items-center gap-1.5 font-semibold">
+                                            <span className="text-emerald-600 font-bold">✓ {skill}</span>
+                                            <span className="text-emerald-700/80 font-normal">— This student can teach this and you want to learn it</span>
+                                        </div>
+                                    ))}
+                                    {profile.skill_matches.can_teach_to_peer?.map((skill: string, idx: number) => (
+                                        <div key={`teach-${idx}`} className="flex items-center gap-1.5 font-semibold">
+                                            <span className="text-emerald-600 font-bold">✓ {skill}</span>
+                                            <span className="text-emerald-700/80 font-normal">— You can teach this and this student wants to learn it</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Skills Can Teach */}
                         <div>
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-2">
-                                Skills I Can Teach
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-600 mb-2.5">
+                                🎓 Skills They Can Teach
                             </h2>
-                            <p className="text-slate-700 bg-slate-50 rounded-xl p-4 border border-slate-100 text-sm">
-                                {profile.skills_can_teach || "Not added yet"}
-                            </p>
+                            {profile.skills_can_teach_list && profile.skills_can_teach_list.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {profile.skills_can_teach_list.map((skill: string, idx: number) => (
+                                        <span
+                                            key={idx}
+                                            className="inline-flex items-center rounded-lg bg-indigo-50 border border-indigo-100 px-3 py-1 text-xs font-semibold text-indigo-700 shadow-2xs"
+                                        >
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-500 bg-slate-50 rounded-xl p-4 border border-slate-100 text-xs">
+                                    {profile.skills_can_teach || "No teaching skills listed yet"}
+                                </p>
+                            )}
                         </div>
 
+                        {/* Skills Want to Learn */}
                         <div>
-                            <h2 className="text-xs font-bold uppercase tracking-wider text-teal-600 mb-2">
-                                Skills I Want to Learn
+                            <h2 className="text-xs font-bold uppercase tracking-wider text-teal-600 mb-2.5">
+                                📚 Skills They Want to Learn
                             </h2>
-                            <p className="text-slate-700 bg-slate-50 rounded-xl p-4 border border-slate-100 text-sm">
-                                {profile.skills_want_to_learn || "Not added yet"}
-                            </p>
+                            {profile.skills_want_to_learn_list && profile.skills_want_to_learn_list.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {profile.skills_want_to_learn_list.map((skill: string, idx: number) => (
+                                        <span
+                                            key={idx}
+                                            className="inline-flex items-center rounded-lg bg-teal-50 border border-teal-100 px-3 py-1 text-xs font-semibold text-teal-700 shadow-2xs"
+                                        >
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-500 bg-slate-50 rounded-xl p-4 border border-slate-100 text-xs">
+                                    {profile.skills_want_to_learn || "No learning skills listed yet"}
+                                </p>
+                            )}
                         </div>
 
                         <div>

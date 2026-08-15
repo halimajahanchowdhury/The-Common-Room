@@ -5,6 +5,11 @@ import Link from "next/link";
 
 import Navbar from "../../components/Navbar";
 import Avatar from "../../components/Avatar";
+import {
+    getSentCollaborationRequests,
+    getReceivedCollaborationRequests,
+    updateCollaborationRequest,
+} from "../../services/auth";
 
 export default function DashboardPage() {
     const [user, setUser] = useState<any>({
@@ -26,6 +31,22 @@ export default function DashboardPage() {
     const [receivedRequests, setReceivedRequests] = useState<any[]>([]);
 
     const loadRequests = (storedName: string) => {
+        const token = localStorage.getItem("access");
+        if (token) {
+            getSentCollaborationRequests(token)
+                .then((data) => {
+                    if (Array.isArray(data)) setSentRequests(data);
+                })
+                .catch(() => {});
+
+            getReceivedCollaborationRequests(token)
+                .then((data) => {
+                    if (Array.isArray(data)) setReceivedRequests(data);
+                })
+                .catch(() => {});
+            return;
+        }
+
         let savedRequests: any[] = [];
         try {
             const parsedReqs = JSON.parse(localStorage.getItem("sent_requests") || "[]");
@@ -38,19 +59,25 @@ export default function DashboardPage() {
 
         const currentNameLower = storedName.toLowerCase().trim();
 
-        // Sent requests (sent BY active user)
         const mySent = savedRequests.filter((r: any) => {
             if (!r) return false;
-            const sender = String(r.from_user || "").toLowerCase().trim();
-            return sender === currentNameLower;
+            if (r.from_username) {
+                return String(r.from_username).toLowerCase().trim() === currentNameLower;
+            }
+            if (currentNameLower === "student") return false;
+            const senderUser = String(r.from_user || "").toLowerCase().trim();
+            return senderUser === currentNameLower && senderUser !== "student";
         });
         setSentRequests(mySent);
 
-        // Received requests (sent TO active user)
         const myReceived = savedRequests.filter((r: any) => {
             if (!r) return false;
-            const recipient = String(r.to_user || "").toLowerCase().trim();
-            return recipient === currentNameLower;
+            if (r.to_username) {
+                return String(r.to_username).toLowerCase().trim() === currentNameLower;
+            }
+            if (currentNameLower === "student") return false;
+            const targetUser = String(r.to_user || "").toLowerCase().trim();
+            return targetUser === currentNameLower && targetUser !== "student";
         });
         setReceivedRequests(myReceived);
     };
@@ -88,7 +115,19 @@ export default function DashboardPage() {
         }
     }, []);
 
-    const handleUpdateRequestStatus = (requestId: number, newStatus: string) => {
+    const handleUpdateRequestStatus = async (requestId: number, newStatus: string) => {
+        const token = localStorage.getItem("access");
+        if (token) {
+            try {
+                await updateCollaborationRequest(requestId, newStatus.toLowerCase(), token);
+                const storedName = localStorage.getItem("user_name") || "Student";
+                loadRequests(storedName);
+                return;
+            } catch (err) {
+                console.error("Failed to update status on server:", err);
+            }
+        }
+
         let savedRequests: any[] = [];
         try {
             const parsedReqs = JSON.parse(localStorage.getItem("sent_requests") || "[]");
@@ -112,7 +151,7 @@ export default function DashboardPage() {
     const isProfileIncomplete = !profile.skills_can_teach || !profile.bio;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col">
             <Navbar />
 
             <main className="flex-1 p-6 md:p-10">
@@ -262,15 +301,25 @@ export default function DashboardPage() {
                                                     </button>
                                                 </>
                                             ) : (
-                                                <span
-                                                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-                                                        req.status === "Accepted"
-                                                            ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
-                                                            : "bg-rose-50 border border-rose-200 text-rose-700"
-                                                    }`}
-                                                >
-                                                    {req.status === "Accepted" ? "Accepted ✅" : "Declined ❌"}
-                                                </span>
+                                                <div className="flex items-center gap-2">
+                                                    <span
+                                                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                                                            req.status === "Accepted"
+                                                                ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                                                                : "bg-rose-50 border border-rose-200 text-rose-700"
+                                                        }`}
+                                                    >
+                                                        {req.status === "Accepted" ? "Accepted ✅" : "Declined ❌"}
+                                                    </span>
+                                                    {req.status === "Accepted" && (
+                                                        <Link
+                                                            href={`/chat?peer=${encodeURIComponent(req.from_username || req.from_user)}`}
+                                                            className="rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition"
+                                                        >
+                                                            Send a Message 💬
+                                                        </Link>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     </div>
@@ -311,21 +360,31 @@ export default function DashboardPage() {
                                                 Skill Focus: <span className="font-semibold text-indigo-600">{req.skills}</span> • Sent on {req.date}
                                             </p>
                                         </div>
-                                        <span
-                                            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-                                                req.status === "Accepted"
-                                                    ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
+                                                    req.status === "Accepted"
+                                                        ? "bg-emerald-50 border border-emerald-200 text-emerald-700"
+                                                        : req.status === "Declined"
+                                                        ? "bg-rose-50 border border-rose-200 text-rose-700"
+                                                        : "bg-amber-50 border border-amber-200 text-amber-700"
+                                                }`}
+                                            >
+                                                {req.status === "Accepted"
+                                                    ? "Accepted ✅"
                                                     : req.status === "Declined"
-                                                    ? "bg-rose-50 border border-rose-200 text-rose-700"
-                                                    : "bg-amber-50 border border-amber-200 text-amber-700"
-                                            }`}
-                                        >
-                                            {req.status === "Accepted"
-                                                ? "Accepted ✅"
-                                                : req.status === "Declined"
-                                                ? "Declined ❌"
-                                                : "Pending ⏳"}
-                                        </span>
+                                                    ? "Declined ❌"
+                                                    : "Pending ⏳"}
+                                            </span>
+                                            {req.status === "Accepted" && (
+                                                <Link
+                                                    href={`/chat?peer=${encodeURIComponent(req.to_username || req.to_user)}`}
+                                                    className="rounded-xl bg-indigo-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:bg-indigo-700 transition"
+                                                >
+                                                    Send a Message 💬
+                                                </Link>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>

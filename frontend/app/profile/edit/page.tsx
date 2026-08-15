@@ -5,6 +5,8 @@ import api from "../../../services/api";
 import Navbar from "../../../components/Navbar";
 import Avatar from "../../../components/Avatar";
 
+import { getProfile, updateProfile } from "../../../services/auth";
+
 export default function EditProfilePage() {
     const [profile, setProfile] = useState<any>({
         full_name: "",
@@ -17,11 +19,104 @@ export default function EditProfilePage() {
         skills_want_to_learn: "",
     });
 
+    const [passwords, setPasswords] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [passwordMessage, setPasswordMessage] = useState("");
+    const [isPasswordSuccess, setIsPasswordSuccess] = useState(false);
+
+    const handlePasswordChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPasswords({
+            ...passwords,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleChangePasswordSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!passwords.currentPassword.trim() || !passwords.newPassword.trim() || !passwords.confirmPassword.trim()) {
+            setPasswordMessage("❌ Please fill out all password fields.");
+            setIsPasswordSuccess(false);
+            return;
+        }
+
+        if (passwords.newPassword.trim() !== passwords.confirmPassword.trim()) {
+            setPasswordMessage("❌ New passwords do not match.");
+            setIsPasswordSuccess(false);
+            return;
+        }
+
+        const storedUsername = localStorage.getItem("user_name") || "Student";
+        const currentNameLower = storedUsername.toLowerCase().trim();
+
+        let allStudents: any[] = [];
+        try {
+            const parsed = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
+            if (Array.isArray(parsed)) allStudents = parsed;
+        } catch {
+            allStudents = [];
+        }
+
+        const foundIndex = allStudents.findIndex((s: any) => 
+            s && (
+                String(s.username || "").toLowerCase().trim() === currentNameLower ||
+                String(s.full_name || "").toLowerCase().trim() === currentNameLower
+            )
+        );
+
+        if (foundIndex !== -1) {
+            const currentStoredPass = allStudents[foundIndex].password || "123";
+            if (passwords.currentPassword.trim() !== currentStoredPass) {
+                setPasswordMessage("❌ Current password is incorrect.");
+                setIsPasswordSuccess(false);
+                return;
+            }
+
+            allStudents[foundIndex].password = passwords.newPassword.trim();
+            localStorage.setItem("all_registered_students", JSON.stringify(allStudents));
+
+            try {
+                const activeProfile = JSON.parse(localStorage.getItem("user_profile") || "{}");
+                activeProfile.password = passwords.newPassword.trim();
+                localStorage.setItem("user_profile", JSON.stringify(activeProfile));
+            } catch {
+                // Ignore
+            }
+
+            setPasswordMessage("✅ Password changed successfully!");
+            setIsPasswordSuccess(true);
+            setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+        } else {
+            setPasswordMessage("❌ Account record not found.");
+            setIsPasswordSuccess(false);
+        }
+    };
+
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [message, setMessage] = useState("");
 
     useEffect(() => {
+        const token = localStorage.getItem("access");
+        if (token) {
+            getProfile(token)
+                .then((data) => {
+                    if (data) {
+                        setProfile((prev: any) => ({ ...prev, ...data }));
+                        localStorage.setItem("user_profile", JSON.stringify(data));
+                        if (data.full_name) localStorage.setItem("user_name", data.full_name);
+                    }
+                })
+                .catch(() => loadLocalProfile());
+        } else {
+            loadLocalProfile();
+        }
+    }, []);
+
+    const loadLocalProfile = () => {
         const storedProfile = localStorage.getItem("user_profile");
         const storedName = localStorage.getItem("user_name");
 
@@ -36,7 +131,7 @@ export default function EditProfilePage() {
         } else if (storedName) {
             setProfile((prev: any) => ({ ...prev, full_name: storedName }));
         }
-    }, []);
+    };
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -66,6 +161,33 @@ export default function EditProfilePage() {
     };
 
     const saveProfile = async () => {
+        const token = localStorage.getItem("access");
+
+        if (token) {
+            try {
+                const updatedData = await updateProfile({
+                    full_name: profile.full_name,
+                    university: profile.university,
+                    department: profile.department,
+                    semester: profile.semester,
+                    bio: profile.bio,
+                    skills_can_teach: profile.skills_can_teach,
+                    skills_want_to_learn: profile.skills_want_to_learn,
+                    profile_picture: profile.profile_picture,
+                }, token);
+
+                setProfile((prev: any) => ({ ...prev, ...updatedData }));
+                localStorage.setItem("user_profile", JSON.stringify(updatedData));
+                if (updatedData.full_name) {
+                    localStorage.setItem("user_name", updatedData.full_name);
+                }
+                setMessage("Profile updated successfully ✅");
+                return;
+            } catch (err) {
+                console.error("Failed to update profile via API:", err);
+            }
+        }
+
         const username = localStorage.getItem("user_name") || profile.full_name || "Student";
         if (profile.full_name) {
             localStorage.setItem("user_name", profile.full_name);
@@ -90,8 +212,13 @@ export default function EditProfilePage() {
         setMessage("Profile updated successfully ✅");
     };
 
+    const parseSkillTags = (str: string) => {
+        if (!str) return [];
+        return str.split(",").map(s => s.trim()).filter(Boolean);
+    };
+
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col">
             <Navbar />
 
             <main className="flex-1 p-6 md:p-10">
@@ -104,21 +231,21 @@ export default function EditProfilePage() {
                     </p>
 
                     {/* Profile Picture Preview & Upload */}
-                    <div className="flex items-center gap-5 p-4 mb-6 rounded-xl border border-slate-100 bg-slate-50/60">
+                    <div className="flex items-center gap-5 p-4 mb-6 rounded-xl border border-slate-100 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800">
                         <Avatar
                             src={imagePreview || profile.profile_picture}
                             name={profile.full_name}
                             size="lg"
                         />
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5">
                                 Profile Picture
                             </label>
                             <input
                                 type="file"
                                 accept="image/*"
                                 onChange={handleFileChange}
-                                className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                                className="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-900/50 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 cursor-pointer"
                             />
                         </div>
                     </div>
@@ -227,6 +354,77 @@ export default function EditProfilePage() {
                         {message && (
                             <p className="mt-3 text-center text-sm font-medium text-indigo-600">
                                 {message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Security & Change Password Card Section */}
+                    <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+                        <div className="pb-4 mb-6 border-b border-slate-100">
+                            <h2 className="text-xl font-bold text-slate-900">
+                                🔒 Security & Password
+                            </h2>
+                            <p className="text-xs font-medium text-slate-500 mt-0.5">
+                                Update your account password for enhanced security.
+                            </p>
+                        </div>
+
+                        <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                    Current Password
+                                </label>
+                                <input
+                                    type="password"
+                                    name="currentPassword"
+                                    placeholder="••••••••"
+                                    value={passwords.currentPassword}
+                                    onChange={handlePasswordChangeInput}
+                                    className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                        New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="newPassword"
+                                        placeholder="••••••••"
+                                        value={passwords.newPassword}
+                                        onChange={handlePasswordChangeInput}
+                                        className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                                        Confirm New Password
+                                    </label>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        placeholder="••••••••"
+                                        value={passwords.confirmPassword}
+                                        onChange={handlePasswordChangeInput}
+                                        className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="w-full rounded-xl bg-slate-900 py-3.5 text-sm font-semibold text-white shadow-xs hover:bg-slate-800 transition"
+                            >
+                                Update Password 🔑
+                            </button>
+                        </form>
+
+                        {passwordMessage && (
+                            <p className={`mt-4 text-center text-xs font-semibold ${isPasswordSuccess ? "text-emerald-600" : "text-rose-600"}`}>
+                                {passwordMessage}
                             </p>
                         )}
                     </div>

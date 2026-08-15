@@ -25,16 +25,21 @@ export const loginUser = async (
     username: string,
     password: string
 ) => {
-
-    const response = await api.post(
-        "token/",
-        {
-            username,
-            password,
+    try {
+        const response = await api.post(
+            "token/",
+            {
+                username,
+                password,
+            }
+        );
+        return response.data;
+    } catch (error: any) {
+        if (error?.response?.data?.detail) {
+            return { error: error.response.data.detail };
         }
-    );
-
-    return response.data;
+        return { error: "Invalid username or password. Please try again." };
+    }
 };
 
 
@@ -73,14 +78,21 @@ export const getProfile = async (
     return response.data;
 };
 
-export const getAllProfiles = async (
-    token: string
-) => {
+export const getMyProfile = getProfile;
 
-    console.log("Token being sent:", token);
+export const getAllProfiles = async (
+    token: string,
+    search?: string,
+    skill?: string
+) => {
+    const params = new URLSearchParams();
+    if (search && search.trim()) params.append("search", search.trim());
+    if (skill && skill.trim()) params.append("skill", skill.trim());
+
+    const queryString = params.toString() ? `?${params.toString()}` : "";
 
     const response = await api.get(
-        "profiles/",
+        `profiles/${queryString}`,
         {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -237,6 +249,92 @@ export const getCollaborationStatus = async (
         }
     );
 
+    return response.data;
+};
+
+export const getChatMessages = async (
+    peer: string,
+    token: string
+) => {
+    const response = await api.get(
+        `chat/messages/?peer=${encodeURIComponent(peer)}`,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    return response.data;
+};
+
+export const sendChatMessage = async (
+    recipient: string,
+    text: string,
+    token: string
+) => {
+    const response = await api.post(
+        "chat/messages/",
+        {
+            recipient,
+            text,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    return response.data;
+};
+
+export const getChatConversations = async (
+    token: string
+) => {
+    const response = await api.get(
+        "chat/conversations/",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    return response.data;
+};
+
+export const updateProfile = async (
+    data: any,
+    token: string
+) => {
+    const response = await api.put(
+        "profiles/me/",
+        data,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+    return response.data;
+};
+
+export const getPosts = async (token: string) => {
+    const response = await api.get("posts/", {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};
+
+export const createPost = async (content: string, token: string) => {
+    const response = await api.post("posts/", { content }, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+};
+
+export const createCommentOnPost = async (postId: number, content: string, token: string) => {
+    const response = await api.post(`posts/${postId}/comments/`, { content }, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
     return response.data;
 };
 

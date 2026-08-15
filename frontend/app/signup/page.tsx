@@ -21,9 +21,26 @@ export default function SignupPage() {
         const currentUsername = username.trim();
         const currentEmail = email.trim();
 
-        localStorage.clear();
+        const existing = JSON.parse(localStorage.getItem("all_registered_students") || "[]");
+        const newStudent = {
+            id: Date.now(),
+            full_name: currentUsername,
+            username: currentUsername,
+            email: currentEmail,
+            password: password.trim(),
+            university: "",
+            department: "",
+            skills_can_teach: "",
+            skills_want_to_learn: "",
+            bio: "",
+            profile_picture: null
+        };
+        const updatedList = [...existing.filter((s: any) => s.username !== currentUsername), newStudent];
+
         localStorage.setItem("user_name", currentUsername);
         localStorage.setItem("user_email", currentEmail);
+        localStorage.setItem("user_profile", JSON.stringify(newStudent));
+        localStorage.setItem("all_registered_students", JSON.stringify(updatedList));
         localStorage.setItem("access", "mock_access_token");
 
         setMessage("✅ Account created successfully! Redirecting to Sign In...");
