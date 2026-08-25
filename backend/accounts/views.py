@@ -38,9 +38,22 @@ class PasswordResetView(APIView):
     def post(self, request):
         identity = request.data.get('identity', '').strip()
         new_password = request.data.get('new_password', '').strip()
+        confirm_new_password = request.data.get('confirm_new_password', '').strip() if 'confirm_new_password' in request.data else None
 
         if not identity or not new_password:
             return Response({'error': 'identity and new_password fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if confirm_new_password is not None and new_password != confirm_new_password:
+            return Response({'error': 'New passwords do not match.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Enforce password complexity validation
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            validate_password(new_password)
+        except DjangoValidationError as e:
+            return Response({'error': ' '.join(e.messages)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Find user by username or email
         user = User.objects.filter(username__iexact=identity).first()
@@ -54,3 +67,4 @@ class PasswordResetView(APIView):
         user.save()
 
         return Response({'message': 'Password reset successfully.'}, status=status.HTTP_200_OK)
+

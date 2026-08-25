@@ -2,14 +2,63 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-body {
-    background-color: #f8fafc;
-    color: #0f172a;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    transition: background-color 0.2s ease, color 0.2s ease;
+@layer base {
+    :root {
+        --bg-main: #f8fafc;
+        --text-main: #0f172a;
+        --card-bg: #ffffff;
+        --card-border: #e2e8f0;
+        --input-bg: #ffffff;
+        --input-border: #cbd5e1;
+    }
+
+    .dark {
+        color-scheme: dark;
+        --bg-main: #0b0f19;
+        --text-main: #f8fafc;
+        --card-bg: #111827;
+        --card-border: #1f2937;
+        --input-bg: #0f172a;
+        --input-border: #1e293b;
+    }
+
+    body {
+        background-color: var(--bg-main);
+        color: var(--text-main);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Inter', sans-serif;
+        transition: background-color 0.25s ease, color 0.25s ease;
+        overflow-x: hidden;
+    }
 }
 
-/* ==================== LIGHT MODE STYLES ==================== */
+/* ==================== SCROLLBAR STYLING ==================== */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #334155;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* ==================== THEME OVERRIDES FOR UNIFORMITY ==================== */
 html:not(.dark) body,
 html:not(.dark) main,
 html:not(.dark) div.min-h-screen {
@@ -17,75 +66,48 @@ html:not(.dark) div.min-h-screen {
     color: #0f172a !important;
 }
 
-html:not(.dark) nav {
-    background-color: #ffffff !important;
-    border-color: #e2e8f0 !important;
-}
-
-html:not(.dark) nav a {
-    color: #1e293b !important;
-    font-weight: 600 !important;
-}
-
-html:not(.dark) nav a:hover {
-    color: #4f46e5 !important;
-}
-
-html:not(.dark) div.bg-white,
-html:not(.dark) form.bg-white {
-    background-color: #ffffff !important;
-    border-color: #e2e8f0 !important;
-    color: #0f172a !important;
-}
-
-html:not(.dark) input,
-html:not(.dark) textarea,
-html:not(.dark) select {
-    background-color: #ffffff !important;
-    border-color: #cbd5e1 !important;
-    color: #0f172a !important;
-}
-
-/* ==================== DARK MODE STYLES ==================== */
-html.dark {
-    color-scheme: dark;
-}
-
 html.dark body,
 html.dark main,
 html.dark div.min-h-screen {
-    background-color: #0b0f19 !important; /* Deep Dark Background */
+    background-color: #0b0f17 !important;
     color: #f8fafc !important;
 }
 
-html.dark nav {
-    background-color: #0f172a !important; /* Dark Slate Header */
-    border-color: #1e293b !important;
-}
-
-html.dark nav a {
-    color: #e2e8f0 !important;
-    font-weight: 600 !important;
-}
-
-html.dark nav a:hover {
-    color: #818cf8 !important;
-}
-
+/* Dark mode card surfaces */
 html.dark div.bg-white,
 html.dark form.bg-white,
 html.dark div.bg-slate-50,
 html.dark div.bg-slate-50\/50,
-html.dark div.bg-slate-50\/60 {
-    background-color: #1e293b !important; /* Dark Slate Cards */
-    border-color: #334155 !important; /* Dark Slate Borders */
+html.dark div.bg-slate-50\/60,
+html.dark section.bg-white {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
     color: #f8fafc !important;
+}
+
+html.dark nav {
+    background-color: rgba(17, 24, 39, 0.9) !important;
+    border-color: #1f2937 !important;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+    background-color: #0b0f17 !important;
+    border-color: #1f2937 !important;
+    color: #f8fafc !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #64748b !important;
 }
 
 html.dark h1, 
 html.dark h2, 
 html.dark h3, 
 html.dark h4, 
+html.dark h5,
 html.dark label,
 html.dark strong,
 html.dark .text-slate-900,
@@ -97,30 +119,22 @@ html.dark p.text-slate-600,
 html.dark p.text-slate-500,
 html.dark span.text-slate-500,
 html.dark span.text-slate-600,
-html.dark label.text-slate-500 {
+html.dark label.text-slate-500,
+html.dark label.text-slate-600 {
     color: #94a3b8 !important;
 }
 
-html.dark input,
-html.dark textarea,
-html.dark select {
-    background-color: #0f172a !important;
-    border-color: #334155 !important;
-    color: #f8fafc !important;
-}
-
-html.dark div.divide-slate-100 > *,
 html.dark div.border-slate-100,
 html.dark div.border-slate-200,
 html.dark div.border-slate-300,
 html.dark p.border-slate-100,
-html.dark div.border-b {
-    border-color: #334155 !important;
+html.dark div.border-b,
+html.dark header.border-b {
+    border-color: #1f2937 !important;
 }
 
-html.dark button.bg-white,
-html.dark label.bg-white {
-    background-color: #1e293b !important;
-    color: #f8fafc !important;
-    border-color: #334155 !important;
+/* Glassmorphism utility */
+.glass-panel {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }

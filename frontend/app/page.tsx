@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getCurrentUser } from "../services/auth";
+import { GraduationCap, BookOpen, MessageSquare, Sparkles, ArrowRight } from "lucide-react";
 
 export default function HomePage() {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -25,24 +26,26 @@ export default function HomePage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white transition-colors">
             {/* Navigation Header */}
             <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 px-6 py-4 transition-colors">
                 <div className="mx-auto flex max-w-6xl items-center justify-between">
                     <Link
                         href="/"
-                        className="text-2xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-800 dark:from-indigo-400 dark:via-violet-400 dark:to-sky-400 bg-clip-text text-transparent tracking-tight hover:opacity-90 transition"
+                        className="flex items-center gap-2 text-2xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-800 dark:from-indigo-400 dark:via-violet-400 dark:to-sky-400 bg-clip-text text-transparent tracking-tight hover:opacity-90 transition"
                     >
-                        The Common Room
+                        <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        <span>The Common Room</span>
                     </Link>
 
                     <div className="flex items-center gap-3 sm:gap-4">
                         {isAuthenticated === true ? (
                             <Link
                                 href="/dashboard"
-                                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/30 transition hover:-translate-y-0.5"
+                                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer"
                             >
-                                Go to Dashboard 🚀
+                                <span>Go to Dashboard</span>
+                                <ArrowRight className="w-4 h-4" />
                             </Link>
                         ) : (
                             <>
@@ -54,9 +57,10 @@ export default function HomePage() {
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/30 transition hover:-translate-y-0.5"
+                                    className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer"
                                 >
-                                    Get Started
+                                    <span>Get Started</span>
+                                    <ArrowRight className="w-4 h-4" />
                                 </Link>
                             </>
                         )}
@@ -90,21 +94,23 @@ export default function HomePage() {
                         {isAuthenticated === true ? (
                             <Link
                                 href="/dashboard"
-                                className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-500 transition hover:-translate-y-0.5"
+                                className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-500 transition flex items-center justify-center gap-2 cursor-pointer"
                             >
-                                Open Dashboard 🚀
+                                <span>Open Dashboard</span>
+                                <ArrowRight className="w-5 h-5" />
                             </Link>
                         ) : (
                             <>
                                 <Link
                                     href="/register"
-                                    className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-500 transition hover:-translate-y-0.5"
+                                    className="w-full sm:w-auto rounded-xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-500 transition flex items-center justify-center gap-2 cursor-pointer"
                                 >
-                                    Get Started Free
+                                    <span>Get Started Free</span>
+                                    <ArrowRight className="w-5 h-5" />
                                 </Link>
                                 <Link
                                     href="/login"
-                                    className="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-4 text-base font-bold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition hover:-translate-y-0.5"
+                                    className="w-full sm:w-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-8 py-4 text-base font-bold text-slate-700 dark:text-slate-200 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
                                 >
                                     Sign In to Account
                                 </Link>
@@ -128,8 +134,8 @@ export default function HomePage() {
                         <div className="grid gap-8 md:grid-cols-3">
                             {/* Feature 1 */}
                             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-8 shadow-xs hover:shadow-md transition hover:border-indigo-300 dark:hover:border-indigo-500/50">
-                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-2xl font-bold">
-                                    🎓
+                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-bold">
+                                    <GraduationCap className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                                     Share Your Expertise
@@ -141,8 +147,8 @@ export default function HomePage() {
 
                             {/* Feature 2 */}
                             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-8 shadow-xs hover:shadow-md transition hover:border-violet-300 dark:hover:border-violet-500/50">
-                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 text-violet-600 dark:text-violet-400 text-2xl font-bold">
-                                    📚
+                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/20 text-violet-600 dark:text-violet-400 font-bold">
+                                    <BookOpen className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                                     Discover Skill Matches
@@ -154,8 +160,8 @@ export default function HomePage() {
 
                             {/* Feature 3 */}
                             <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/80 p-8 shadow-xs hover:shadow-md transition hover:border-sky-300 dark:hover:border-sky-500/50">
-                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 text-sky-600 dark:text-sky-400 text-2xl font-bold">
-                                    💬
+                                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 text-sky-600 dark:text-sky-400 font-bold">
+                                    <MessageSquare className="w-6 h-6" />
                                 </div>
                                 <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                                     Peer Messaging & Collabs

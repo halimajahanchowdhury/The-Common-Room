@@ -23,11 +23,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return super().validate(attrs)
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=1)
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'password')
+        fields = ('id', 'username', 'email', 'password', 'confirm_password')
 
     def validate_username(self, value):
         cleaned = value.strip()
@@ -41,7 +42,26 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("A user with that email address already exists.")
         return cleaned
 
+    def validate(self, attrs):
+        password = attrs.get('password', '')
+        confirm_password = attrs.get('confirm_password')
+
+        if confirm_password is not None and password != confirm_password:
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match."})
+
+        # Enforce Django password validation rules
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        try:
+            validate_password(password)
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({"password": list(e.messages)})
+
+        return attrs
+
     def create(self, validated_data):
+        validated_data.pop('confirm_password', None)
         user = User.objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
