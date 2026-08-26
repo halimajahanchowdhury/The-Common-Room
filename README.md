@@ -17,83 +17,176 @@
 
 ---
 
-## Project Overview
+## 1. Project Overview
 
-**The Common Room** is a modern, peer-to-peer campus collaboration platform designed to connect university students for peer tutoring, skill exchange, and academic project partnerships.
+**The Common Room** is a peer-to-peer campus collaboration platform designed to connect university students for peer tutoring, skill sharing, and academic project partnerships.
 
-The platform bridges the gap between students who have skills to teach and students seeking to learn — featuring an automated **Skill Exchange Match Engine**, **1-on-1 Realtime Messaging with Read Receipts**, **Dual Sign-In Support**, and **Strong Password Security Validation**.
-
----
-
-## Features & Architecture
-
-### Authentication & Security
-- **Dual Sign-In Support**: Log in using either your **Username OR Email address**.
-- **Strong Password Validation**: Enforces 5 security criteria on `/register`, `/forgot-password`, and `/profile/edit`:
-  - 8+ characters
-  - At least 1 uppercase letter (`A-Z`)
-  - At least 1 lowercase letter (`a-z`)
-  - At least 1 number (`0-9`)
-  - At least 1 special character (`!@#$%^&*...`)
-- **Realtime Requirement Checklist**: Visual feedback indicators (`Check` / `X`) while typing passwords.
-- **Confirm Password Matching**: Real-time validation preventing form submission when confirmation fields mismatch.
-- **Password Visibility Toggles**: Interactive `Eye` / `EyeOff` icons on all password fields.
-- **Password Recovery**: Integrated `/forgot-password` flow enforcing strong password rules.
-- **JWT Session Security**: Authentic access & refresh tokens via SimpleJWT with protected API routes.
-
-### Profile System & Portfolio Customization
-- **Profile Customization**: Edit full name, university, department, semester, bio, and skill portfolios.
-- **Canvas Profile Picture Upload**: Client-side HTML5 canvas compression (300×300 JPEG) for fast, lightweight avatar persistence in PostgreSQL.
-- **Skill Portfolios**:
-  - **Skills I Can Teach** — list skills available to share with peers.
-  - **Skills I Want to Learn** — list skills the student is actively seeking.
-
-### Skill Exchange Match Engine
-- Automatically detects mutual skill overlaps between student portfolios.
-- Highlights potential matches prominently on student detail pages (`/students/[id]`) and student directory cards:
-  - *Skills You Can Learn From Peer*
-  - *Skills You Can Teach To Peer*
-
-### Collaboration Requests & Privacy Controls
-- Send and receive peer collaboration requests across campus.
-- Manage incoming/outgoing requests on the Dashboard (`Pending`, `Accepted`, `Declined`).
-- **Strict Privacy Enforcement**: Messaging and collaborator comment features are restricted to accepted student collaborators.
-
-### 1-on-1 Realtime Messaging & Read Receipts
-- Modern split-pane messaging app interface at `/chat`.
-- Live message polling with automatic updates.
-- **Status Receipts**: Visual indicators for `Delivered` vs `Seen` messages.
-- **Unread Notification Badge**: Realtime message badge in the persistent navigation bar.
-
-### Directory Search & Skill Filtering
-- **Search Bar**: Instant client-side & server-side search across student names, universities, departments, bios, and skills.
-- **Quick Skill Filter Chips**: One-click filtering by popular tech/academic skills (`Python`, `React`, `Django`, `C++`, `AI`, `Design`, `Math`).
-- **Active Filter Bar**: Clear visual feedback of active filters with one-click reset.
-
-### UI/UX Design System
-- **Lucide React Icon System**: Clean, professional icon set replacing all decorative UI emojis.
-- **Dark & Light Mode Balance**: Intentional dark slate theme (`#0b0f17` background, `#111827` card surfaces) and crisp light theme with glassmorphic navbar styling.
-- **Responsive Layout**: Designed for seamless use on desktop, tablet, and mobile screens.
+The application allows students to create detailed academic profiles, list skills they can teach and skills they want to learn, discover compatible study partners, and communicate safely through private 1-on-1 messaging.
 
 ---
 
-## Application Pages
+## 2. Problem Statement
+
+In university environments, students often face several challenges when trying to collaborate:
+
+1. **Skill Discovery Gap**: Students frequently struggle to find peers who possess specific technical or academic skills they need to learn.
+2. **Fragmented Communication**: Finding study partners across different departments usually happens through unstructured group chats, leading to lost requests and low response rates.
+3. **Lack of Privacy Controls**: Unfiltered contact details make it difficult for students to connect safely without first establishing a mutual collaboration agreement.
+
+---
+
+## 3. Objectives
+
+The primary goals of **The Common Room** are:
+
+- **Facilitate Peer Learning**: Enable students to exchange knowledge by matching skills they can teach with skills others want to learn.
+- **Automate Partner Matching**: Provide an intelligent match engine that highlights mutual learning opportunities between peers.
+- **Provide a Secure Environment**: Protect user privacy by requiring accepted collaboration requests before unlocking direct messaging and profile feedback.
+- **Ensure High Security Standards**: Implement dual sign-in support, strong password validation policies, and secure token-based authentication.
+
+---
+
+## 4. Entity Relationship (ER) Diagram
+
+```mermaid
+erDiagram
+    USER ||--|| PROFILE : "has"
+    USER ||--o{ COLLABORATION_REQUEST : "sends / receives"
+    USER ||--o{ CHAT_MESSAGE : "sends / receives"
+    USER ||--o{ COMMENT : "authors"
+    PROFILE ||--o{ COMMENT : "receives feedback on"
+
+    USER {
+        int id PK
+        string username
+        string email
+        string password
+    }
+
+    PROFILE {
+        int id PK
+        int user_id FK
+        string full_name
+        string university
+        string department
+        string semester
+        string bio
+        text skills_can_teach
+        text skills_want_to_learn
+        text profile_picture
+    }
+
+    COLLABORATION_REQUEST {
+        int id PK
+        int sender_id FK
+        int receiver_id FK
+        string status
+        datetime created_at
+    }
+
+    COMMENT {
+        int id PK
+        int author_id FK
+        int profile_id FK
+        text text
+        datetime created_at
+    }
+
+    CHAT_MESSAGE {
+        int id PK
+        int sender_id FK
+        int receiver_id FK
+        text message
+        boolean is_read
+        datetime timestamp
+    }
+```
+
+---
+
+## 5. Database Model Overview
+
+| Entity | Model Name | Description | Key Attributes |
+|---|---|---|---|
+| User Credentials | `User` | Built-in Django authentication model | `username`, `email`, `password` |
+| Student Profile | `Profile` | Extended student metadata and portfolios | `university`, `department`, `semester`, `skills_can_teach`, `skills_want_to_learn`, `profile_picture` |
+| Collaboration Request | `CollaborationRequest` | Formal connection state between two peers | `sender`, `receiver`, `status` (`pending`/`accepted`/`declined`) |
+| Peer Feedback | `Comment` | Comments posted on collaborator profiles | `author`, `profile`, `text`, `created_at` |
+| Private Messaging | `ChatMessage` | 1-on-1 direct messages between peers | `sender`, `receiver`, `message`, `is_read`, `timestamp` |
+
+---
+
+## 6. System Requirements
+
+### 6.1 Functional Requirements
+
+- **User Authentication & Access Control**
+  - Registration with full name, university email, department, and password.
+  - Dual sign-in support allowing login using either **Username OR Email address**.
+  - Password security enforcing 5 rules (8+ characters, uppercase, lowercase, digit, special character).
+  - Real-time password requirement checklist and password visibility toggles.
+  - Password recovery interface via `/forgot-password`.
+
+- **Profile & Portfolio Customization**
+  - Create and edit student profiles including bio, university, department, and semester.
+  - Publish lists of "Skills I Can Teach" and "Skills I Want to Learn".
+  - Upload avatar photos processed through client-side canvas image scaling.
+
+- **Skill Exchange Match Engine**
+  - Automatically evaluate overlap between user skill portfolios.
+  - Display "Potential Skill Exchange Match" banners when mutual teaching/learning synergies exist.
+
+- **Collaboration Request Workflow**
+  - Send, view, accept, or decline peer collaboration requests.
+  - Prevent duplicate or self-directed requests.
+  - Real-time status indicators across student cards (Pending Sent, Pending Received, Connected).
+
+- **1-on-1 Messaging & Feedback**
+  - Private messaging split-view interface accessible exclusively to accepted collaborators.
+  - Message status receipts (Delivered vs. Seen) and navigation bar unread counter badges.
+  - Profile comments system restricted to verified student collaborators.
+
+- **Student Directory & Search**
+  - Search students by name, department, university, bio, or specific skills.
+  - One-click filter chips for popular technical and academic topics.
+
+---
+
+### 6.2 Non-Functional Requirements
+
+- **Security**: Sensitive data protection using PBKDF2 password hashing, JWT authorization headers, and backend validation guards.
+- **Usability**: Responsive user interface supporting dark and light themes, clean typography, and intuitive navigation.
+- **Performance**: Lightweight API response payloads and client-side image compression for fast page load times.
+- **Reliability & Data Integrity**: Foreign key constraints and transaction safety enforced through Django ORM and PostgreSQL.
+
+---
+
+## 7. System Architecture & Request Data Flow
+
+1. **Client Interface**: User interacts with Next.js App Router components.
+2. **API Communication**: Axios sends HTTP requests attached with `Authorization: Bearer <JWT_Access_Token>` headers.
+3. **Backend Middleware & Security**: Django REST Framework authenticates tokens, verifies permissions, and validates payloads.
+4. **Database Operations**: Django ORM performs safe parameterized queries against PostgreSQL.
+
+---
+
+## 8. Application Pages
 
 | Route | Description |
 |---|---|
-| `/` | Landing page highlighting platform features and auth-aware call-to-action buttons. |
-| `/login` | Dual username/email sign-in form with password visibility toggle. |
-| `/register` | Account registration form with realtime 5-criteria password checklist and confirm password field. |
-| `/forgot-password` | Password recovery page enforcing strong password criteria and confirmation matching. |
-| `/dashboard` | Student hub displaying profile summary, skill cards, received requests, and sent request tracking. |
-| `/students` | Student Directory with search bar, quick skill pills, active filter chips, and peer profile cards. |
-| `/students/[id]` | Peer profile detail page highlighting Skill Exchange Matches, collaboration actions, and discussion comments. |
-| `/profile/edit` | Profile customization form for avatar upload, academic info, skill portfolios, and security password updates. |
-| `/chat` | 1-on-1 split-pane messaging interface with active peer list, message history, read receipts, and unread badges. |
+| `/` | Landing homepage detailing platform capabilities with auth-aware actions. |
+| `/login` | Dual username/email sign-in page with password visibility toggles. |
+| `/register` | Registration page with live 5-rule password checklist and confirmation matching. |
+| `/forgot-password` | Password recovery page enforcing security compliance. |
+| `/dashboard` | Student hub displaying profile summary, skill cards, and request management. |
+| `/students` | Student Directory featuring search, skill filter chips, and peer profile cards. |
+| `/students/[id]` | Peer profile detail page highlighting Skill Matches, request actions, and comments. |
+| `/profile/edit` | Profile edit page for academic info, avatar upload, and security updates. |
+| `/chat` | Private 1-on-1 messaging interface with read receipts and active peer list. |
 
 ---
 
-## Tech Stack
+## 9. Tech Stack
 
 ### Frontend
 - **Framework**: Next.js (App Router)
@@ -111,7 +204,7 @@ The platform bridges the gap between students who have skills to teach and stude
 
 ---
 
-## Project Structure
+## 10. Project Structure
 
 ```text
 TheCommonRoom/
@@ -147,7 +240,7 @@ TheCommonRoom/
 
 ---
 
-## Local Development Setup
+## 11. Local Development Setup
 
 ### 1. Prerequisites
 - Python 3.10+
@@ -224,7 +317,7 @@ TheCommonRoom/
 
 ---
 
-## Automated Testing
+## 12. Automated Testing
 
 Run the test suite in `backend/`:
 
@@ -244,6 +337,14 @@ Run the test suite in `backend/`:
 
 ---
 
-## License
+## 13. Future System Roadmap
+
+- **WebSocket Communication**: Upgrade chat polling to Django Channels + WebSockets for instant streaming.
+- **Study Sessions Scheduler**: Interactive calendar to schedule group study slots.
+- **Push Notifications**: Live browser alerts for incoming requests and unread messages.
+
+---
+
+## 14. License
 
 This project is open-source and available under the [MIT License](https://opensource.org/licenses/MIT).
