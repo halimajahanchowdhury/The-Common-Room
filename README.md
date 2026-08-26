@@ -2,7 +2,7 @@
 
 <div align="center">
 
-### *Where Students Learn, Collaborate & Grow Together*
+### *where students learn, collaborate & grow together*
 
 ![Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?style=for-the-badge&logo=typescript)
