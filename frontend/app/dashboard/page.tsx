@@ -14,6 +14,7 @@ import {
     Sparkles,
     GraduationCap,
     BookOpen,
+    Building,
     Inbox,
     Send,
     Check,
@@ -227,8 +228,38 @@ export default function DashboardPage() {
                                     {profile?.full_name || user.username}
                                 </h1>
                                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                                    @{profile?.username || user.username} • {profile?.email || user.email} {profile?.university ? `• ${profile.university}` : ""} {profile?.department ? `(${profile.department})` : ""}
+                                    @{profile?.username || user.username} • {profile?.email || user.email}
                                 </p>
+
+                                {/* Academic Info Tag Bar */}
+                                {(profile?.university || profile?.department || profile?.semester) && (
+                                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                        {profile?.university && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                                <Building className="w-3 h-3 text-slate-400 shrink-0" />
+                                                <span>{profile.university}</span>
+                                            </span>
+                                        )}
+                                        {profile?.department && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/40 px-2.5 py-1 text-[11px] font-semibold text-indigo-700 dark:text-indigo-300">
+                                                <GraduationCap className="w-3 h-3 text-indigo-500 shrink-0" />
+                                                <span>{profile.department}</span>
+                                            </span>
+                                        )}
+                                        {profile?.semester && (
+                                            <span className="inline-flex items-center gap-1 rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-100 dark:border-teal-900/40 px-2.5 py-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300">
+                                                <BookOpen className="w-3 h-3 text-teal-500 shrink-0" />
+                                                <span>
+                                                    {profile.semester.toLowerCase().includes("semester")
+                                                        ? profile.semester
+                                                        : profile.semester.toLowerCase().includes("year")
+                                                        ? profile.semester
+                                                        : `Semester ${profile.semester}`}
+                                                </span>
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 

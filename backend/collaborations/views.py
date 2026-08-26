@@ -35,15 +35,20 @@ class CreateCollaborationRequestView(APIView):
         if receiver.id == request.user.id:
             return Response({'error': 'You cannot send a collaboration request to yourself.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check for existing pending request
-        existing_pending = CollaborationRequest.objects.filter(
-            sender=request.user,
-            receiver=receiver,
-            status='pending'
-        ).exists()
+        # Check for existing request in EITHER direction (pending or accepted)
+        existing_collab = CollaborationRequest.objects.filter(
+            (Q(sender=request.user, receiver=receiver) | Q(sender=receiver, receiver=request.user)),
+            status__in=['pending', 'accepted', 'Pending', 'Accepted']
+        ).first()
 
-        if existing_pending:
-            return Response({'error': 'A pending collaboration request already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+        if existing_collab:
+            status_lower = existing_collab.status.lower()
+            if status_lower == 'accepted':
+                return Response({'error': 'You are already connected as collaborators with this student.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif existing_collab.sender == request.user:
+                return Response({'error': 'A collaboration request has already been sent to this student.'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'This student has already sent you a collaboration request. Please respond on your Dashboard.'}, status=status.HTTP_400_BAD_REQUEST)
 
         collab_request = CollaborationRequest.objects.create(
             sender=request.user,

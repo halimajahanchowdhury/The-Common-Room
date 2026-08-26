@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
@@ -35,6 +36,7 @@ export default function StudentProfilePage() {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
     const [collaborationStatus, setCollaborationStatus] = useState("");
+    const [isSender, setIsSender] = useState(true);
     const [commentMessage, setCommentMessage] = useState("");
     const [comments, setComments] = useState<any[]>([]);
     const [commentText, setCommentText] = useState("");
@@ -68,6 +70,9 @@ export default function StudentProfilePage() {
         getCollaborationStatus(id, token)
             .then((data) => {
                 setCollaborationStatus(data.status);
+                if (typeof data.is_sender === "boolean") {
+                    setIsSender(data.is_sender);
+                }
             })
             .catch((error) => {
                 console.error(error);
@@ -87,6 +92,7 @@ export default function StudentProfilePage() {
             await sendCollaborationRequest(id, token);
             setMessage("Collaboration request sent successfully!");
             setCollaborationStatus("pending");
+            setIsSender(true);
         } catch (error: any) {
             console.error(error);
             setMessage(error?.response?.data?.detail || error?.response?.data?.error || "Failed to send collaboration request.");
@@ -267,28 +273,47 @@ export default function StudentProfilePage() {
                                 <span>Send Collaboration Request</span>
                             </button>
                         ) : collaborationStatus === "pending" ? (
-                            <button
-                                disabled
-                                className="w-full rounded-xl bg-amber-500/90 py-3.5 text-sm font-semibold text-white cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                <Clock className="w-4 h-4" />
-                                <span>Collaboration Request Pending</span>
-                            </button>
+                            isSender ? (
+                                <button
+                                    disabled
+                                    className="w-full rounded-xl bg-amber-500/90 py-3.5 text-sm font-semibold text-white cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    <Clock className="w-4 h-4" />
+                                    <span>Collaboration Request Pending</span>
+                                </button>
+                            ) : (
+                                <Link
+                                    href="/dashboard"
+                                    className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3.5 text-sm font-semibold text-white shadow-xs transition flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>Request Received — Respond on Dashboard</span>
+                                </Link>
+                            )
                         ) : collaborationStatus === "accepted" ? (
-                            <button
-                                disabled
-                                className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-semibold text-white cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                <CheckCircle2 className="w-4 h-4" />
-                                <span>Collaboration Accepted</span>
-                            </button>
-                        ) : collaborationStatus === "rejected" ? (
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                                <button
+                                    disabled
+                                    className="w-full sm:w-auto flex-1 rounded-xl bg-emerald-600/90 py-3.5 text-sm font-semibold text-white cursor-default flex items-center justify-center gap-2"
+                                >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>Connected Collaborators</span>
+                                </button>
+                                <Link
+                                    href={`/chat?peer=${profile.username}`}
+                                    className="w-full sm:w-auto rounded-xl bg-indigo-600 hover:bg-indigo-500 px-6 py-3.5 text-sm font-bold text-white shadow-xs transition flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <MessageSquare className="w-4 h-4" />
+                                    <span>Message in Chat</span>
+                                </Link>
+                            </div>
+                        ) : collaborationStatus === "rejected" || collaborationStatus === "declined" ? (
                             <button
                                 disabled
                                 className="w-full rounded-xl bg-rose-600 py-3.5 text-sm font-semibold text-white cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 <XCircle className="w-4 h-4" />
-                                <span>Request Rejected</span>
+                                <span>Request Declined</span>
                             </button>
                         ) : null}
 
