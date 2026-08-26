@@ -376,7 +376,7 @@ export default function EditProfilePage() {
                                     name="skills_can_teach"
                                     value={profile.skills_can_teach || ""}
                                     onChange={handleChange}
-                                    placeholder="Comma-separated: e.g. Python, Machine Learning, UI Design"
+                                    placeholder="e.g. Python, Machine Learning, UI Design"
                                     className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                                 />
                             </div>
@@ -390,7 +390,7 @@ export default function EditProfilePage() {
                                     name="skills_want_to_learn"
                                     value={profile.skills_want_to_learn || ""}
                                     onChange={handleChange}
-                                    placeholder="Comma-separated: e.g. Next.js, Django, Data Structures"
+                                    placeholder="e.g. Next.js, Django, Data Structures"
                                     className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                                 />
                             </div>
