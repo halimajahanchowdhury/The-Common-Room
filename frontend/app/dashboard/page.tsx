@@ -206,8 +206,8 @@ export default function DashboardPage() {
     const acceptedCollabsCount = receivedRequests.filter((r) => String(r.status).toLowerCase() === "accepted").length +
         sentRequests.filter((r) => String(r.status).toLowerCase() === "accepted").length;
 
-    const teachSkillsCount = profile?.skills_can_teach ? profile.skills_can_teach.split(",").filter((s: string) => s.trim()).length : 0;
-    const learnSkillsCount = profile?.skills_want_to_learn ? profile.skills_want_to_learn.split(",").filter((s: string) => s.trim()).length : 0;
+    const teachSkillsCount = profile?.skills_can_teach ? profile.skills_can_teach.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).length : 0;
+    const learnSkillsCount = profile?.skills_want_to_learn ? profile.skills_want_to_learn.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).length : 0;
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col transition-colors">
@@ -299,8 +299,8 @@ export default function DashboardPage() {
                                     <span>Skills I Can Teach</span>
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {profile?.skills_can_teach ? (
-                                        profile.skills_can_teach.split(",").map((skill: string, index: number) => (
+                                    {profile?.skills_can_teach && profile.skills_can_teach.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).length > 0 ? (
+                                        profile.skills_can_teach.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).map((skill: string, index: number) => (
                                             <span
                                                 key={index}
                                                 className="inline-block rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/40 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300"
@@ -320,8 +320,8 @@ export default function DashboardPage() {
                                     <span>Skills I Want to Learn</span>
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {profile?.skills_want_to_learn ? (
-                                        profile.skills_want_to_learn.split(",").map((skill: string, index: number) => (
+                                    {profile?.skills_want_to_learn && profile.skills_want_to_learn.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).length > 0 ? (
+                                        profile.skills_want_to_learn.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).map((skill: string, index: number) => (
                                             <span
                                                 key={index}
                                                 className="inline-block rounded-lg bg-teal-50 dark:bg-teal-950/60 border border-teal-100 dark:border-teal-900/40 px-3 py-1 text-xs font-semibold text-teal-700 dark:text-teal-300"

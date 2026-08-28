@@ -26,6 +26,14 @@ import {
     Trash2,
 } from "lucide-react";
 
+const parseSkillBadges = (skillsStr: string) => {
+    if (!skillsStr) return [];
+    return skillsStr
+        .split(/[,;\n\r|•]+/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
+};
+
 export default function EditProfilePage() {
     const [profile, setProfile] = useState<any>({
         full_name: "",
@@ -406,31 +414,73 @@ export default function EditProfilePage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1.5 flex items-center gap-1.5">
-                                    <GraduationCap className="w-4 h-4" />
-                                    <span>Skills I Can Teach</span>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1 flex items-center justify-between">
+                                    <span className="flex items-center gap-1.5">
+                                        <GraduationCap className="w-4 h-4" />
+                                        <span>Skills I Can Teach</span>
+                                    </span>
+                                    <span className="text-[10px] font-normal text-slate-400">Commas, newlines, or semicolons</span>
                                 </label>
                                 <textarea
                                     name="skills_can_teach"
                                     value={profile.skills_can_teach || ""}
                                     onChange={handleChange}
-                                    placeholder="e.g. Python, Machine Learning, UI Design"
+                                    placeholder="e.g. Python, Machine Learning, UI Design, Circuit Analysis"
                                     className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
                                 />
+                                {/* Live Badges Preview */}
+                                <div className="mt-2 flex flex-wrap items-center gap-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Preview:</span>
+                                    {profile.skills_can_teach && parseSkillBadges(profile.skills_can_teach).length > 0 ? (
+                                        parseSkillBadges(profile.skills_can_teach).map((skill: string, idx: number) => (
+                                            <span
+                                                key={idx}
+                                                className="inline-flex items-center rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/80 dark:border-indigo-900/50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 shadow-2xs"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">
+                                            No skills entered yet
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1.5 flex items-center gap-1.5">
-                                    <BookOpen className="w-4 h-4" />
-                                    <span>Skills I Want to Learn</span>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1 flex items-center justify-between">
+                                    <span className="flex items-center gap-1.5">
+                                        <BookOpen className="w-4 h-4" />
+                                        <span>Skills I Want to Learn</span>
+                                    </span>
+                                    <span className="text-[10px] font-normal text-slate-400">Commas, newlines, or semicolons</span>
                                 </label>
                                 <textarea
                                     name="skills_want_to_learn"
                                     value={profile.skills_want_to_learn || ""}
                                     onChange={handleChange}
-                                    placeholder="e.g. Next.js, Django, Data Structures"
-                                    className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                                    placeholder="e.g. Next.js, Cloud Computing, Algorithms, Statistics"
+                                    className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
                                 />
+                                {/* Live Badges Preview */}
+                                <div className="mt-2 flex flex-wrap items-center gap-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Preview:</span>
+                                    {profile.skills_want_to_learn && parseSkillBadges(profile.skills_want_to_learn).length > 0 ? (
+                                        parseSkillBadges(profile.skills_want_to_learn).map((skill: string, idx: number) => (
+                                            <span
+                                                key={idx}
+                                                className="inline-flex items-center rounded-lg bg-teal-50 dark:bg-teal-950/70 border border-teal-200/80 dark:border-teal-900/50 px-2.5 py-0.5 text-xs font-semibold text-teal-700 dark:text-teal-300 shadow-2xs"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">
+                                            No skills entered yet
+                                        </span>
+                                    )}
+                                </div>
                             </div>
 
                             <button

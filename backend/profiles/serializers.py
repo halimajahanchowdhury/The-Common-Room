@@ -1,3 +1,4 @@
+import re
 from rest_framework import serializers
 from .models import Profile
 
@@ -5,7 +6,7 @@ def parse_skills(skills_str):
     if not skills_str:
         return []
     skills = []
-    for item in str(skills_str).split(','):
+    for item in re.split(r'[,;\n\r|•]+', str(skills_str)):
         cleaned = item.strip()
         if cleaned and cleaned not in skills:
             skills.append(cleaned)
