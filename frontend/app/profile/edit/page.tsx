@@ -22,6 +22,8 @@ import {
     EyeOff,
     Check,
     X,
+    Upload,
+    Trash2,
 } from "lucide-react";
 
 export default function EditProfilePage() {
@@ -193,6 +195,17 @@ export default function EditProfilePage() {
         }
     };
 
+    const handleRemovePhoto = () => {
+        setImageFile(null);
+        setImagePreview(null);
+        setProfile((prev: any) => ({
+            ...prev,
+            profile_picture: null,
+        }));
+        const fileInput = document.getElementById("avatar-file-input") as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+    };
+
     const saveProfile = async () => {
         setSaving(true);
         setMessage("");
@@ -210,11 +223,8 @@ export default function EditProfilePage() {
                     bio: profile.bio || "",
                     skills_can_teach: profile.skills_can_teach || "",
                     skills_want_to_learn: profile.skills_want_to_learn || "",
+                    profile_picture: profile.profile_picture || null,
                 };
-
-                if (profile.profile_picture) {
-                    payload.profile_picture = profile.profile_picture;
-                }
 
                 const updatedData = await updateProfile(payload, token);
 
@@ -253,6 +263,8 @@ export default function EditProfilePage() {
         setSaving(false);
     };
 
+    const hasPhoto = Boolean(imagePreview || profile.profile_picture);
+
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col transition-colors">
             <Navbar />
@@ -272,7 +284,7 @@ export default function EditProfilePage() {
                             Update your profile picture, academic details, and skills portfolio to help peer students find you.
                         </p>
 
-                        {/* Profile Picture Preview & Upload */}
+                        {/* Profile Picture Preview & Action Toolbar (Option 2) */}
                         <div className="flex flex-col sm:flex-row items-center gap-5 p-5 mb-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40">
                             <Avatar
                                 src={imagePreview || profile.profile_picture}
@@ -280,19 +292,45 @@ export default function EditProfilePage() {
                                 size="xl"
                             />
                             <div className="flex-1 text-center sm:text-left">
-                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-center sm:justify-start gap-1.5">
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 flex items-center justify-center sm:justify-start gap-1.5">
                                     <Camera className="w-4 h-4 text-indigo-500" />
                                     <span>Profile Photo</span>
                                 </label>
-                                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3">
-                                    Upload a JPEG or PNG avatar. Photos are auto-scaled for fast loading.
+                                <p className="text-xs text-slate-400 dark:text-slate-500 mb-3.5">
+                                    Upload a custom avatar or reset to your default initials avatar.
                                 </p>
+
+                                {/* Hidden File Input */}
                                 <input
+                                    id="avatar-file-input"
                                     type="file"
                                     accept="image/*"
                                     onChange={handleFileChange}
-                                    className="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950/60 file:text-indigo-700 dark:file:text-indigo-300 hover:file:bg-indigo-100 cursor-pointer"
+                                    className="hidden"
                                 />
+
+                                {/* Action Buttons */}
+                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+                                    <button
+                                        type="button"
+                                        onClick={() => document.getElementById("avatar-file-input")?.click()}
+                                        className="rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                                    >
+                                        <Upload className="w-3.5 h-3.5" />
+                                        <span>{hasPhoto ? "Change Photo" : "Upload Photo"}</span>
+                                    </button>
+
+                                    {hasPhoto && (
+                                        <button
+                                            type="button"
+                                            onClick={handleRemovePhoto}
+                                            className="rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 px-3.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300 transition flex items-center gap-1.5 cursor-pointer"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                            <span>Remove Photo</span>
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
