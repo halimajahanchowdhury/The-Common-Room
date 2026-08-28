@@ -44,32 +44,32 @@ Students create academic profiles, list skills they can teach and skills they wa
 
 ## 2. Key Features
 
-- **🔐 Robust Authentication & Security**:
+- ** Robust Authentication & Security**:
   - Dual sign-in supporting **Username OR University Email**.
   - Complex 5-rule password validation (8+ characters, uppercase, lowercase, numbers, special characters).
   - JWT Access and Refresh token lifecycle with automatic bearer header injection.
   - Password recovery and reset flow via `/forgot-password`.
 
-- **🎓 Interactive Profile & Skills Tag System**:
+- ** Interactive Profile & Skills Tag System**:
   - **Tag / Pill Input Box**: Type a skill and press `Enter`, `Comma`, or `+ Add` to create badges with 1-click `✕` deletion.
   - **Multi-Delimiter Parser**: Automatically parses and splits pasted lists across commas, semicolons, line breaks, pipes, and bullet points.
   - **Avatar Toolbar**: Instant image upload, client-side canvas scaling, and 1-click photo removal with gradient initials avatar fallback.
 
-- **🤝 Automated Skill Matching Engine**:
+- ** Automated Skill Matching Engine**:
   - Automatically calculates reciprocal learning opportunities (`can_teach_to_peer` and `can_learn_from_peer`) between students.
   - Highlights compatibility match banners across the student directory.
 
-- **📋 3-Tab Student Command Dashboard**:
+- ** 3-Tab Student Command Dashboard**:
   - **Collaboration Requests**: Tab for incoming and outgoing collaboration requests with 1-click Accept/Decline actions.
   - **Peer Endorsements**: Read-only testimonial feed left by verified campus study buddies.
   - **My Overview**: 4-KPI live metric grid tracking connected peers, skills taught, skills to learn, and endorsements.
 
-- **💬 Real-Time 1-on-1 Messaging**:
+- ** Real-Time 1-on-1 Messaging**:
   - In-app direct chat exclusively unlocked between accepted collaborators.
   - Intelligent scroll preservation (polling never pulls users down while reviewing past message history).
   - Visual message alignment (sent in indigo on the right, received on the left) and live unread counter badges.
 
-- **📱 Fully Responsive Mobile Drawer Navigation**:
+- ** Fully Responsive Mobile Drawer Navigation**:
   - Adaptive layout across smartphones, tablets (including iPad Mini), laptops, and desktop monitors.
   - Collapsible mobile drawer menu featuring an integrated **3-Way Appearance Switcher** (☀️ Light, 🌙 Dark, 💻 System Device Match).
 
