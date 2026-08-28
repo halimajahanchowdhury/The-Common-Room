@@ -2,5 +2,8 @@
   publish = ".next"
   command = "npm run build"
 
+[build.environment]
+  DISABLE_NETLIFY_DRAWER = "true"
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
