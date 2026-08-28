@@ -24,6 +24,7 @@ import {
     X,
     Upload,
     Trash2,
+    Plus,
 } from "lucide-react";
 
 const parseSkillBadges = (skillsStr: string) => {
@@ -33,6 +34,155 @@ const parseSkillBadges = (skillsStr: string) => {
         .map((s) => s.trim())
         .filter((s) => s.length > 0);
 };
+
+interface SkillTagInputProps {
+    label: string;
+    icon: React.ReactNode;
+    colorScheme: "indigo" | "teal";
+    skillsString: string;
+    onChange: (newString: string) => void;
+    placeholder: string;
+}
+
+function SkillTagInput({
+    label,
+    icon,
+    colorScheme,
+    skillsString,
+    onChange,
+    placeholder,
+}: SkillTagInputProps) {
+    const [inputValue, setInputValue] = useState("");
+    const tags = parseSkillBadges(skillsString);
+
+    const addSkills = (input: string) => {
+        if (!input.trim()) return;
+        const newTags = input
+            .split(/[,;\n\r|•]+/)
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0);
+
+        if (newTags.length === 0) return;
+
+        const existingLower = new Set(tags.map((t) => t.toLowerCase()));
+        const updated = [...tags];
+
+        for (const t of newTags) {
+            if (!existingLower.has(t.toLowerCase())) {
+                updated.push(t);
+                existingLower.add(t.toLowerCase());
+            }
+        }
+
+        onChange(updated.join(", "));
+        setInputValue("");
+    };
+
+    const removeSkill = (indexToRemove: number) => {
+        const updated = tags.filter((_, idx) => idx !== indexToRemove);
+        onChange(updated.join(", "));
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" || e.key === "," || e.key === ";") {
+            e.preventDefault();
+            addSkills(inputValue);
+        } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
+            removeSkill(tags.length - 1);
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        const text = e.clipboardData.getData("text");
+        if (text && (text.includes(",") || text.includes("\n") || text.includes(";") || text.includes("|"))) {
+            e.preventDefault();
+            addSkills(text);
+        }
+    };
+
+    const isIndigo = colorScheme === "indigo";
+
+    return (
+        <div>
+            <label className={`block text-xs font-bold uppercase tracking-wider mb-1.5 flex items-center justify-between ${
+                isIndigo ? "text-indigo-600 dark:text-indigo-400" : "text-teal-600 dark:text-teal-400"
+            }`}>
+                <span className="flex items-center gap-1.5">
+                    {icon}
+                    <span>{label}</span>
+                </span>
+                <span className="text-[10px] font-normal text-slate-400">
+                    {tags.length} skill{tags.length === 1 ? "" : "s"} added
+                </span>
+            </label>
+
+            {/* Tag Container Box */}
+            <div className={`p-3.5 rounded-2xl border bg-white dark:bg-slate-950 transition space-y-3 shadow-2xs ${
+                isIndigo 
+                    ? "border-slate-200 dark:border-slate-800 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20" 
+                    : "border-slate-200 dark:border-slate-800 focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-500/20"
+            }`}>
+                {/* Active Pills List */}
+                <div className="flex flex-wrap items-center gap-2 min-h-[32px]">
+                    {tags.length > 0 ? (
+                        tags.map((skill, idx) => (
+                            <span
+                                key={idx}
+                                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold shadow-2xs transition ${
+                                    isIndigo
+                                        ? "bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/90 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300"
+                                        : "bg-teal-50 dark:bg-teal-950/70 border border-teal-200/90 dark:border-teal-800/80 text-teal-700 dark:text-teal-300"
+                                }`}
+                            >
+                                <span>{skill}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => removeSkill(idx)}
+                                    className={`rounded-full p-0.5 hover:bg-black/10 dark:hover:bg-white/10 transition cursor-pointer ${
+                                        isIndigo ? "text-indigo-600 dark:text-indigo-400" : "text-teal-600 dark:text-teal-400"
+                                    }`}
+                                    title={`Remove ${skill}`}
+                                >
+                                    <X className="w-3.5 h-3.5" />
+                                </button>
+                            </span>
+                        ))
+                    ) : (
+                        <span className="text-xs text-slate-400 dark:text-slate-500 italic py-1">
+                            No skills added yet. Type below to add your first skill!
+                        </span>
+                    )}
+                </div>
+
+                {/* Input with Add Button */}
+                <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                    <input
+                        type="text"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        onPaste={handlePaste}
+                        placeholder={placeholder}
+                        className="flex-1 bg-transparent text-xs md:text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none py-1"
+                    />
+                    <button
+                        type="button"
+                        onClick={() => addSkills(inputValue)}
+                        disabled={!inputValue.trim()}
+                        className={`rounded-xl px-3.5 py-1.5 text-xs font-bold text-white transition flex items-center gap-1 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs shrink-0 ${
+                            isIndigo
+                                ? "bg-indigo-600 hover:bg-indigo-500"
+                                : "bg-teal-600 hover:bg-teal-500"
+                        }`}
+                    >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function EditProfilePage() {
     const [profile, setProfile] = useState<any>({
@@ -413,75 +563,23 @@ export default function EditProfilePage() {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mb-1 flex items-center justify-between">
-                                    <span className="flex items-center gap-1.5">
-                                        <GraduationCap className="w-4 h-4" />
-                                        <span>Skills I Can Teach</span>
-                                    </span>
-                                    <span className="text-[10px] font-normal text-slate-400">Commas, newlines, or semicolons</span>
-                                </label>
-                                <textarea
-                                    name="skills_can_teach"
-                                    value={profile.skills_can_teach || ""}
-                                    onChange={handleChange}
-                                    placeholder="e.g. Python, Machine Learning, UI Design, Circuit Analysis"
-                                    className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
-                                />
-                                {/* Live Badges Preview */}
-                                <div className="mt-2 flex flex-wrap items-center gap-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Preview:</span>
-                                    {profile.skills_can_teach && parseSkillBadges(profile.skills_can_teach).length > 0 ? (
-                                        parseSkillBadges(profile.skills_can_teach).map((skill: string, idx: number) => (
-                                            <span
-                                                key={idx}
-                                                className="inline-flex items-center rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-200/80 dark:border-indigo-900/50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 shadow-2xs"
-                                            >
-                                                {skill}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">
-                                            No skills entered yet
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
+                            <SkillTagInput
+                                label="Skills I Can Teach"
+                                icon={<GraduationCap className="w-4 h-4" />}
+                                colorScheme="indigo"
+                                skillsString={profile.skills_can_teach || ""}
+                                onChange={(val) => setProfile((prev: any) => ({ ...prev, skills_can_teach: val }))}
+                                placeholder="Type a skill and press Enter or Comma (e.g. Python)..."
+                            />
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-1 flex items-center justify-between">
-                                    <span className="flex items-center gap-1.5">
-                                        <BookOpen className="w-4 h-4" />
-                                        <span>Skills I Want to Learn</span>
-                                    </span>
-                                    <span className="text-[10px] font-normal text-slate-400">Commas, newlines, or semicolons</span>
-                                </label>
-                                <textarea
-                                    name="skills_want_to_learn"
-                                    value={profile.skills_want_to_learn || ""}
-                                    onChange={handleChange}
-                                    placeholder="e.g. Next.js, Cloud Computing, Algorithms, Statistics"
-                                    className="h-24 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3.5 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"
-                                />
-                                {/* Live Badges Preview */}
-                                <div className="mt-2 flex flex-wrap items-center gap-1.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800">
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Preview:</span>
-                                    {profile.skills_want_to_learn && parseSkillBadges(profile.skills_want_to_learn).length > 0 ? (
-                                        parseSkillBadges(profile.skills_want_to_learn).map((skill: string, idx: number) => (
-                                            <span
-                                                key={idx}
-                                                className="inline-flex items-center rounded-lg bg-teal-50 dark:bg-teal-950/70 border border-teal-200/80 dark:border-teal-900/50 px-2.5 py-0.5 text-xs font-semibold text-teal-700 dark:text-teal-300 shadow-2xs"
-                                            >
-                                                {skill}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">
-                                            No skills entered yet
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
+                            <SkillTagInput
+                                label="Skills I Want to Learn"
+                                icon={<BookOpen className="w-4 h-4" />}
+                                colorScheme="teal"
+                                skillsString={profile.skills_want_to_learn || ""}
+                                onChange={(val) => setProfile((prev: any) => ({ ...prev, skills_want_to_learn: val }))}
+                                placeholder="Type a skill and press Enter or Comma (e.g. Machine Learning)..."
+                            />
 
                             <button
                                 onClick={saveProfile}
