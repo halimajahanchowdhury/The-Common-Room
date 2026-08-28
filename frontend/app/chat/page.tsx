@@ -35,13 +35,37 @@ function ChatContent() {
     const [newMessage, setNewMessage] = useState("");
 
     const chatEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const isNearBottomRef = useRef(true);
+    const prevMessagesCountRef = useRef(0);
 
-    const scrollToBottom = () => {
-        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+        chatEndRef.current?.scrollIntoView({ behavior });
     };
 
+    const handleScroll = () => {
+        if (messagesContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+            // If user is within 120px of bottom, consider them "near bottom"
+            isNearBottomRef.current = scrollHeight - scrollTop - clientHeight < 120;
+        }
+    };
+
+    // Scroll to bottom when opening or switching a peer conversation
     useEffect(() => {
-        scrollToBottom();
+        isNearBottomRef.current = true;
+        prevMessagesCountRef.current = 0;
+        scrollToBottom("auto");
+    }, [activePeer?.username || activePeer?.full_name]);
+
+    // Only auto-scroll on new message if user is already at the bottom
+    useEffect(() => {
+        const isNewMessageAdded = messages.length > prevMessagesCountRef.current;
+        prevMessagesCountRef.current = messages.length;
+
+        if (isNewMessageAdded && isNearBottomRef.current) {
+            scrollToBottom("smooth");
+        }
     }, [messages]);
 
     const loadLocalConnections = (storedName: string) => {
@@ -214,6 +238,8 @@ function ChatContent() {
                 const sentData = await sendChatMessage(peerIdentifier, newMessage.trim(), freshToken);
                 setMessages((prev) => [...prev, sentData]);
                 setNewMessage("");
+                isNearBottomRef.current = true;
+                setTimeout(() => scrollToBottom("smooth"), 50);
                 return;
             } catch (err: any) {
                 console.error("Failed to send message to backend:", err);
@@ -243,6 +269,8 @@ function ChatContent() {
         localStorage.setItem("peer_chat_messages", JSON.stringify(allChats));
         setMessages(updatedMessages);
         setNewMessage("");
+        isNearBottomRef.current = true;
+        setTimeout(() => scrollToBottom("smooth"), 50);
     };
 
     const getPeerUnreadCount = (peerUsername: string) => {
@@ -349,7 +377,11 @@ function ChatContent() {
                                 </div>
 
                                 {/* Message Scroll Box */}
-                                <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/40 dark:bg-slate-950/50">
+                                <div
+                                    ref={messagesContainerRef}
+                                    onScroll={handleScroll}
+                                    className="flex-1 p-6 overflow-y-auto space-y-4 bg-slate-50/40 dark:bg-slate-950/50"
+                                >
                                     {messages.length === 0 ? (
                                         <div className="h-full flex flex-col items-center justify-center text-center p-6 text-slate-400 dark:text-slate-500">
                                             <Hand className="w-8 h-8 text-indigo-500 mb-2" />
