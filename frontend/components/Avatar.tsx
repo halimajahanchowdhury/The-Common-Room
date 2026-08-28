@@ -28,7 +28,10 @@ export default function Avatar({ src, name, username, size = "md" }: AvatarProps
     }[size];
 
     if (src) {
-        const imageUrl = (src.startsWith("http") || src.startsWith("data:")) ? src : `http://127.0.0.1:8000${src}`;
+        const apiHost = process.env.NEXT_PUBLIC_API_URL
+            ? process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, "")
+            : "http://127.0.0.1:8000";
+        const imageUrl = (src.startsWith("http") || src.startsWith("data:")) ? src : `${apiHost}${src}`;
         return (
             <img
                 src={imageUrl}
