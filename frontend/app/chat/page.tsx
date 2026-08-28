@@ -9,6 +9,7 @@ import {
     getChatMessages,
     sendChatMessage,
     getChatConversations,
+    getProfile,
 } from "../../services/auth";
 import {
     MessageSquare,
@@ -26,6 +27,8 @@ function ChatContent() {
     const peerParam = searchParams.get("peer") || "";
 
     const [currentUser, setCurrentUser] = useState("");
+    const [currentUsername, setCurrentUsername] = useState("");
+    const [currentFullName, setCurrentFullName] = useState("");
     const [connections, setConnections] = useState<any[]>([]);
     const [activePeer, setActivePeer] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -99,8 +102,23 @@ function ChatContent() {
         const storedName = localStorage.getItem("user_name") || "Student";
         setCurrentUser(storedName);
 
+        try {
+            const cachedProfile = JSON.parse(localStorage.getItem("user_profile") || "{}");
+            if (cachedProfile.username) setCurrentUsername(cachedProfile.username);
+            if (cachedProfile.full_name) setCurrentFullName(cachedProfile.full_name);
+        } catch {}
+
         const token = localStorage.getItem("access");
         if (token) {
+            getProfile(token)
+                .then((prof) => {
+                    if (prof) {
+                        if (prof.username) setCurrentUsername(prof.username);
+                        if (prof.full_name) setCurrentFullName(prof.full_name);
+                    }
+                })
+                .catch(() => {});
+
             getChatConversations(token)
                 .then((data) => {
                     if (Array.isArray(data) && data.length > 0) {
@@ -344,7 +362,17 @@ function ChatContent() {
                                         </div>
                                     ) : (
                                         messages.map((msg: any) => {
-                                            const isMe = msg.sender.toLowerCase().trim() === currentUser.toLowerCase().trim();
+                                             const senderLower = String(msg.sender || msg.sender_username || "").toLowerCase().trim();
+                                             const senderFullNameLower = String(msg.sender_full_name || "").toLowerCase().trim();
+                                             const recipientLower = String(msg.recipient || msg.recipient_username || "").toLowerCase().trim();
+                                             const peerUsernameLower = String(activePeer?.username || "").toLowerCase().trim();
+                                             const peerFullNameLower = String(activePeer?.full_name || "").toLowerCase().trim();
+
+                                             const isMe = 
+                                                 (currentUsername && senderLower === currentUsername.toLowerCase().trim()) ||
+                                                 (currentUser && (senderLower === currentUser.toLowerCase().trim() || senderFullNameLower === currentUser.toLowerCase().trim())) ||
+                                                 (currentFullName && senderFullNameLower === currentFullName.toLowerCase().trim()) ||
+                                                 (activePeer && (recipientLower === peerUsernameLower || recipientLower === peerFullNameLower));
 
                                             return (
                                                 <div
