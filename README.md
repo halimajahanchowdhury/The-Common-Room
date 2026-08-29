@@ -2,47 +2,100 @@
 
 <div align="center">
 
-### *where students learn, collaborate & grow together*
+### *A Peer-to-Peer Campus Skill Sharing & Academic Collaboration Platform*
 
-![Next.js](https://img.shields.io/badge/Frontend-Next.js-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?style=for-the-badge&logo=typescript)
-![TailwindCSS](https://img.shields.io/badge/UI-TailwindCSS-38B2AC?style=for-the-badge&logo=tailwind-css)
-![Lucide Icons](https://img.shields.io/badge/Icons-Lucide%20React-violet?style=for-the-badge)
-![Django](https://img.shields.io/badge/Backend-Django-darkgreen?style=for-the-badge&logo=django)
-![Django REST Framework](https://img.shields.io/badge/API-Django%20REST-A30000?style=for-the-badge&logo=django)
-![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue?style=for-the-badge&logo=postgresql)
-![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens)
+[![Frontend - Vercel](https://img.shields.io/badge/Frontend-Vercel-black?style=for-the-badge&logo=vercel)](https://thecommonroom-hub.vercel.app)
+[![Frontend - Netlify](https://img.shields.io/badge/Frontend-Netlify-00C7B7?style=for-the-badge&logo=netlify)](https://thecommonroom-hub.netlify.app)
+[![Backend - Render](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render)](https://thecommonroom-backend.onrender.com)
+[![Database - Neon PostgreSQL](https://img.shields.io/badge/Database-Neon_PostgreSQL-00E599?style=for-the-badge&logo=postgresql)](https://neon.tech)
+[![Uptime - Active](https://img.shields.io/badge/Uptime-24%2F7_Monitored-blue?style=for-the-badge)](https://thecommonroom-backend.onrender.com/admin/login/)
+
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.1.6-black?logo=next.js)](https://nextjs.org/)
+[![React 19](https://img.shields.io/badge/React-19.0.0-blue?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
+[![Django 5](https://img.shields.io/badge/Django-5.x-092E20?logo=django)](https://www.djangoproject.com/)
+[![Django REST Framework](https://img.shields.io/badge/API-Django_REST_Framework-A30000?logo=django)](https://www.django-rest-framework.org/)
+[![JWT Auth](https://img.shields.io/badge/Auth-SimpleJWT-black?logo=jsonwebtokens)](https://django-rest-framework-simplejwt.readthedocs.io/)
 
 </div>
 
 ---
 
+## 🌐 Live Production Links
+
+| Service | Platform | Live URL |
+| :--- | :--- | :--- |
+| **Frontend (Primary)** | Vercel Cloud | 🚀 **[https://thecommonroom-hub.vercel.app](https://thecommonroom-hub.vercel.app)** |
+| **Frontend (Mirror)** | Netlify Edge | 🌐 **[https://thecommonroom-hub.netlify.app](https://thecommonroom-hub.netlify.app)** |
+| **Backend API** | Render Web Service | ⚡ `https://thecommonroom-backend.onrender.com/api/` |
+| **Database** | Neon Serverless Cloud | 🐘 PostgreSQL 16 (Singapore AWS) |
+| **24/7 Keepalive** | UptimeRobot | 🟢 Active HTTP Monitor |
+
+---
+
 ## 1. Project Overview
 
-**The Common Room** is a peer-to-peer campus collaboration platform designed to connect university students for peer tutoring, skill sharing, and academic project partnerships.
+**The Common Room** is a campus collaboration platform designed to connect university students for peer tutoring, technical skill sharing, and academic project partnerships.
 
-The application allows students to create detailed academic profiles, list skills they can teach and skills they want to learn, discover compatible study partners, and communicate safely through private 1-on-1 messaging.
-
----
-
-## 2. Problem Statement
-
-In university environments, students often face several challenges when trying to collaborate:
-
-1. **Skill Discovery Gap**: Students frequently struggle to find peers who possess specific technical or academic skills they need to learn.
-2. **Fragmented Communication**: Finding study partners across different departments usually happens through unstructured group chats, leading to lost requests and low response rates.
-3. **Lack of Privacy Controls**: Unfiltered contact details make it difficult for students to connect safely without first establishing a mutual collaboration agreement.
+Students create academic profiles, list skills they can teach and skills they want to learn, discover peer matches through an automated matching engine, send collaboration requests, chat in real-time with accepted study buddies, and receive verified peer endorsements.
 
 ---
 
-## 3. Objectives
+## 2. Key Features
 
-The primary goals of **The Common Room** are:
+- **🔐 Robust Authentication & Security**:
+  - Dual sign-in supporting **Username OR University Email**.
+  - Complex 5-rule password validation (8+ characters, uppercase, lowercase, numbers, special characters).
+  - JWT Access and Refresh token lifecycle with automatic bearer header injection.
+  - Password recovery and reset flow via `/forgot-password`.
 
-- **Facilitate Peer Learning**: Enable students to exchange knowledge by matching skills they can teach with skills others want to learn.
-- **Automate Partner Matching**: Provide an intelligent match engine that highlights mutual learning opportunities between peers.
-- **Provide a Secure Environment**: Protect user privacy by requiring accepted collaboration requests before unlocking direct messaging and profile feedback.
-- **Ensure High Security Standards**: Implement dual sign-in support, strong password validation policies, and secure token-based authentication.
+- **🎓 Interactive Profile & Skills Tag System**:
+  - **Tag / Pill Input Box**: Type a skill and press `Enter`, `Comma`, or `+ Add` to create badges with 1-click `✕` deletion.
+  - **Multi-Delimiter Parser**: Automatically parses and splits pasted lists across commas, semicolons, line breaks, pipes, and bullet points.
+  - **Avatar Toolbar**: Instant image upload, client-side canvas scaling, and 1-click photo removal with gradient initials avatar fallback.
+
+- **🤝 Automated Skill Matching Engine**:
+  - Automatically calculates reciprocal learning opportunities (`can_teach_to_peer` and `can_learn_from_peer`) between students.
+  - Highlights compatibility match banners across the student directory.
+
+- **📋 3-Tab Student Command Dashboard**:
+  - **Collaboration Requests**: Tab for incoming and outgoing collaboration requests with 1-click Accept/Decline actions.
+  - **Peer Endorsements**: Read-only testimonial feed left by verified campus study buddies.
+  - **My Overview**: 4-KPI live metric grid tracking connected peers, skills taught, skills to learn, and endorsements.
+
+- **💬 Real-Time 1-on-1 Messaging**:
+  - In-app direct chat exclusively unlocked between accepted collaborators.
+  - Intelligent scroll preservation (polling never pulls users down while reviewing past message history).
+  - Visual message alignment (sent in indigo on the right, received on the left) and live unread counter badges.
+
+- **📱 Fully Responsive Mobile Drawer Navigation**:
+  - Adaptive layout across smartphones, tablets (including iPad Mini), laptops, and desktop monitors.
+  - Collapsible mobile drawer menu featuring an integrated **3-Way Appearance Switcher** (☀️ Light, 🌙 Dark, 💻 System Device Match).
+
+---
+
+## 3. Tech Stack
+
+### Frontend
+- **Framework**: Next.js 16.1.6 (App Router)
+- **Language**: TypeScript 5.x
+- **UI & Styling**: Tailwind CSS v4, Vanilla CSS Custom Design System
+- **Icons**: Lucide React (`lucide-react`)
+- **HTTP Client**: Axios with JWT Bearer Interceptors
+- **Hosting**: Vercel & Netlify
+
+### Backend
+- **Framework**: Python 3.10+ / Django 5.x
+- **API Engine**: Django REST Framework (DRF)
+- **Authentication**: SimpleJWT (`rest_framework_simplejwt`)
+- **CORS Handling**: `django-cors-headers`
+- **WSGI Server**: Gunicorn & WhiteNoise
+- **Hosting**: Render (Web Service)
+
+### Database & Cloud
+- **Engine**: PostgreSQL 16 (Neon Serverless AWS Singapore)
+- **Local Fallback**: SQLite (`db.sqlite3`)
 
 ---
 
@@ -88,7 +141,7 @@ erDiagram
         int id PK
         int author_id FK
         int profile_id FK
-        text text
+        text content
         datetime created_at
     }
 
@@ -96,210 +149,112 @@ erDiagram
         int id PK
         int sender_id FK
         int receiver_id FK
-        text message
-        boolean is_read
-        datetime timestamp
+        text text
+        string status
+        datetime created_at
     }
 ```
 
 ---
 
-## 5. Database Model Overview
-
-| Entity | Model Name | Description | Key Attributes |
-|---|---|---|---|
-| User Credentials | `User` | Built-in Django authentication model | `username`, `email`, `password` |
-| Student Profile | `Profile` | Extended student metadata and portfolios | `university`, `department`, `semester`, `skills_can_teach`, `skills_want_to_learn`, `profile_picture` |
-| Collaboration Request | `CollaborationRequest` | Formal connection state between two peers | `sender`, `receiver`, `status` (`pending`/`accepted`/`declined`) |
-| Peer Feedback | `Comment` | Comments posted on collaborator profiles | `author`, `profile`, `text`, `created_at` |
-| Private Messaging | `ChatMessage` | 1-on-1 direct messages between peers | `sender`, `receiver`, `message`, `is_read`, `timestamp` |
-
----
-
-## 6. System Requirements
-
-### 6.1 Functional Requirements
-
-- **User Authentication & Access Control**
-  - Registration with full name, university email, department, and password.
-  - Dual sign-in support allowing login using either **Username OR Email address**.
-  - Password security enforcing 5 rules (8+ characters, uppercase, lowercase, digit, special character).
-  - Real-time password requirement checklist and password visibility toggles.
-  - Password recovery interface via `/forgot-password`.
-
-- **Profile & Portfolio Customization**
-  - Create and edit student profiles including bio, university, department, and semester.
-  - Publish lists of "Skills I Can Teach" and "Skills I Want to Learn".
-  - Upload avatar photos processed through client-side canvas image scaling.
-
-- **Skill Exchange Match Engine**
-  - Automatically evaluate overlap between user skill portfolios.
-  - Display "Potential Skill Exchange Match" banners when mutual teaching/learning synergies exist.
-
-- **Collaboration Request Workflow**
-  - Send, view, accept, or decline peer collaboration requests.
-  - Prevent duplicate or self-directed requests.
-  - Real-time status indicators across student cards (Pending Sent, Pending Received, Connected).
-
-- **1-on-1 Messaging & Feedback**
-  - Private messaging split-view interface accessible exclusively to accepted collaborators.
-  - Message status receipts (Delivered vs. Seen) and navigation bar unread counter badges.
-  - Profile comments system restricted to verified student collaborators.
-
-- **Student Directory & Search**
-  - Search students by name, department, university, bio, or specific skills.
-  - One-click filter chips for popular technical and academic topics.
-
----
-
-### 6.2 Non-Functional Requirements
-
-- **Security**: Sensitive data protection using PBKDF2 password hashing, JWT authorization headers, and backend validation guards.
-- **Usability**: Responsive user interface supporting dark and light themes, clean typography, and intuitive navigation.
-- **Performance**: Lightweight API response payloads and client-side image compression for fast page load times.
-- **Reliability & Data Integrity**: Foreign key constraints and transaction safety enforced through Django ORM and PostgreSQL.
-
----
-
-## 7. System Architecture & Request Data Flow
-
-1. **Client Interface**: User interacts with Next.js App Router components.
-2. **API Communication**: Axios sends HTTP requests attached with `Authorization: Bearer <JWT_Access_Token>` headers.
-3. **Backend Middleware & Security**: Django REST Framework authenticates tokens, verifies permissions, and validates payloads.
-4. **Database Operations**: Django ORM performs safe parameterized queries against PostgreSQL.
-
----
-
-## 8. Application Pages
+## 5. Application Routes
 
 | Route | Description |
-|---|---|
-| `/` | Landing homepage detailing platform capabilities with auth-aware actions. |
-| `/login` | Dual username/email sign-in page with password visibility toggles. |
-| `/register` | Registration page with live 5-rule password checklist and confirmation matching. |
-| `/forgot-password` | Password recovery page enforcing security compliance. |
-| `/dashboard` | Student hub displaying profile summary, skill cards, and request management. |
-| `/students` | Student Directory featuring search, skill filter chips, and peer profile cards. |
-| `/students/[id]` | Peer profile detail page highlighting Skill Matches, request actions, and comments. |
-| `/profile/edit` | Profile edit page for academic info, avatar upload, and security updates. |
-| `/chat` | Private 1-on-1 messaging interface with read receipts and active peer list. |
+| :--- | :--- |
+| `/` | Auth-aware landing page with platform highlights and call-to-actions. |
+| `/login` | Dual username/email sign-in with password visibility toggles. |
+| `/register` / `/signup` | Registration page with live 5-rule password strength checklist. |
+| `/forgot-password` | Account recovery and password reset. |
+| `/dashboard` | 3-Tab command center (Requests, Feedback, Overview KPIs). |
+| `/students` | Student Directory with keyword search, skill pills, and match badges. |
+| `/students/[id]` | Peer profile detail with reciprocal skill matrix and testimonial trigger. |
+| `/profile/edit` | Academic metadata editor, avatar toolbar, and interactive skill tag box. |
+| `/chat` | 1-on-1 messaging interface with collaborator badges and unread counter. |
 
 ---
 
-## 9. Tech Stack
-
-### Frontend
-- **Framework**: Next.js (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **Icon System**: Lucide React (`lucide-react`)
-
-### Backend
-- **Framework**: Django 6
-- **API Framework**: Django REST Framework
-- **Authentication**: SimpleJWT (`rest_framework_simplejwt`)
-
-### Database
-- **Engine**: PostgreSQL (`commonroom_db`)
-
----
-
-## 10. Project Structure
+## 6. Project Directory Structure
 
 ```text
 TheCommonRoom/
 ├── backend/
-│   ├── accounts/          # User registration, dual login, password validation & reset
-│   ├── profiles/          # Student profile management & avatar storage
-│   ├── collaborations/    # Collaboration request workflow (pending/accepted/declined)
-│   ├── posts/             # Profile collaborator feedback comments
-│   ├── chat/              # 1-on-1 private messaging, unread counts & read receipts
-│   └── common_room_backend/ # Django project configuration & settings
+│   ├── accounts/              # Registration, dual login, password validation & reset
+│   ├── profiles/              # Student profile management, skills match serializer & avatar storage
+│   ├── collaborations/        # Collaboration request workflow (pending/accepted/declined)
+│   ├── posts/                 # Verified collaborator testimonials & endorsements
+│   ├── chat/                  # 1-on-1 messaging, unread counts & message history
+│   └── common_room_backend/   # Django project settings & database configuration
 │
 └── frontend/
-    ├── app/               # Next.js App Router pages
-    │   ├── page.tsx           # Auth-aware landing homepage
-    │   ├── dashboard/         # Student dashboard hub
-    │   ├── login/             # Dual sign-in page
-    │   ├── register/          # User registration page
-    │   ├── forgot-password/   # Password recovery page
-    │   ├── profile/edit/      # Edit profile & security settings page
-    │   ├── chat/              # 1-on-1 realtime messaging page
-    │   └── students/
-    │       ├── page.tsx       # Browse student directory
-    │       └── [id]/          # Peer student profile & match detail page
+    ├── app/                   # Next.js App Router pages
+    │   ├── page.tsx               # Responsive landing homepage
+    │   ├── dashboard/             # 3-Tab student dashboard hub
+    │   ├── login/                 # Sign-in page
+    │   ├── register/              # Registration page
+    │   ├── forgot-password/       # Password reset page
+    │   ├── profile/edit/          # Profile editor with Interactive Skill Tag Box
+    │   ├── chat/                  # Real-time messaging page
+    │   └── students/              # Student directory & peer profile details
     ├── components/
-    │   ├── Navbar.tsx         # Persistent navigation bar & theme toggle
-    │   └── Avatar.tsx         # Multi-size avatar & initials fallback component
+    │   ├── Navbar.tsx             # Responsive navbar with mobile drawer & 3-way theme switcher
+    │   └── Avatar.tsx             # Image avatar with dynamic initials gradient fallback
     ├── utils/
-    │   └── passwordValidation.ts # Shared password security criteria evaluator
+    │   └── passwordValidation.ts  # Shared password complexity rules
     └── services/
-        ├── api.ts             # Axios instance configuration
-        └── auth.ts            # REST API service functions
+        ├── api.ts                 # Axios client instance
+        └── auth.ts                # REST API service functions
 ```
 
 ---
 
-## 11. Local Development Setup
+## 7. Local Development Setup
 
 ### 1. Prerequisites
 - Python 3.10+
 - Node.js 18+
-- PostgreSQL database (`commonroom_db`)
+- PostgreSQL or SQLite
 
 ---
 
 ### 2. Backend Setup
 
-1. Navigate to the `backend` directory:
+1. Navigate to `backend`:
    ```bash
    cd backend
    ```
 
 2. Create and activate a virtual environment:
    ```bash
+   # Windows:
    python -m venv venv
-   # On Windows:
    venv\Scripts\activate
-   # On macOS/Linux:
+
+   # macOS/Linux:
+   python3 -m venv venv
    source venv/bin/activate
    ```
 
-3. Install requirements:
+3. Install dependencies:
    ```bash
-   pip install django djangorestframework djangorestframework-simplejwt django-cors-headers psycopg2-binary requests
+   pip install -r requirements.txt
    ```
 
-4. Configure PostgreSQL in `common_room_backend/settings.py`:
-   ```python
-   DATABASES = {
-       'default': {
-           'ENGINE': 'django.db.backends.postgresql',
-           'NAME': 'commonroom_db',
-           'USER': 'postgres',
-           'PASSWORD': '54321',
-           'HOST': 'localhost',
-           'PORT': '5432',
-       }
-   }
-   ```
-
-5. Run database migrations:
+4. Run database migrations:
    ```bash
    python manage.py migrate
    ```
 
-6. Start the Django backend server:
+5. Start the backend server:
    ```bash
    python manage.py runserver 8000
    ```
-   > Backend API runs at `http://127.0.0.1:8000/api/`
+   > Backend API will be available at `http://127.0.0.1:8000/api/`
 
 ---
 
 ### 3. Frontend Setup
 
-1. Navigate to the `frontend` directory in a new terminal:
+1. Navigate to `frontend` in a new terminal:
    ```bash
    cd frontend
    ```
@@ -313,38 +268,34 @@ TheCommonRoom/
    ```bash
    npm run dev
    ```
-   > Frontend runs at `http://localhost:3000/`
+   > Frontend will run at `http://localhost:3000/`
 
 ---
 
-## 12. Automated Testing
+## 8. Testing Suite
 
-Run the test suite in `backend/`:
+Run backend validation test scripts in `backend/`:
 
-- **Password Validation Unit Tests**:
-  ```bash
-  python test_password_validation.py
-  ```
-- **Django Configuration Check**:
-  ```bash
-  python manage.py check
-  ```
-- **Stage 1–8 Full System Tests**:
-  ```bash
-  python test_stage1.py
-  python test_stage8.py
-  ```
+```bash
+# Password Security Validator:
+python test_password_validation.py
 
----
+# Django Configuration Check:
+python manage.py check
 
-## 13. Future System Roadmap
+# Full System Integration Stages:
+python test_stage1.py
+python test_stage8.py
+```
 
-- **WebSocket Communication**: Upgrade chat polling to Django Channels + WebSockets for instant streaming.
-- **Study Sessions Scheduler**: Interactive calendar to schedule group study slots.
-- **Push Notifications**: Live browser alerts for incoming requests and unread messages.
+Run frontend type check in `frontend/`:
+
+```bash
+npx tsc --noEmit
+```
 
 ---
 
-## 14. License
+## 9. License
 
-This project is open-source and available under the [MIT License](https://opensource.org/licenses/MIT).
+This project is open-source and licensed under the [MIT License](https://opensource.org/licenses/MIT).
