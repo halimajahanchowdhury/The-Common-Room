@@ -124,9 +124,16 @@ class CollaborationStatusView(APIView):
         if target_user.id == request.user.id:
             return Response({'status': 'self'}, status=status.HTTP_200_OK)
 
+        # Check for active accepted or pending request first
         collab = CollaborationRequest.objects.filter(
-            (Q(sender=request.user, receiver=target_user) | Q(sender=target_user, receiver=request.user))
-        ).order_by('-created_at').first()
+            (Q(sender=request.user, receiver=target_user) | Q(sender=target_user, receiver=request.user)),
+            status__in=['pending', 'accepted', 'Pending', 'Accepted']
+        ).first()
+
+        if not collab:
+            collab = CollaborationRequest.objects.filter(
+                (Q(sender=request.user, receiver=target_user) | Q(sender=target_user, receiver=request.user))
+            ).order_by('-created_at').first()
 
         if not collab:
             return Response({'status': 'none'}, status=status.HTTP_200_OK)

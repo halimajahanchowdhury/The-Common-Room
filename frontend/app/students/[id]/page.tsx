@@ -308,13 +308,24 @@ export default function StudentProfilePage() {
                                 </Link>
                             </div>
                         ) : collaborationStatus === "rejected" || collaborationStatus === "declined" ? (
-                            <button
-                                disabled
-                                className="w-full rounded-xl bg-rose-600 py-3.5 text-sm font-semibold text-white cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                                <XCircle className="w-4 h-4" />
-                                <span>Request Declined</span>
-                            </button>
+                            <div className="space-y-3">
+                                <div className="rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50 dark:bg-rose-950/30 px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                                    <div className="flex items-center gap-2 font-bold text-rose-700 dark:text-rose-300">
+                                        <XCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                                        <span>Previous request was declined</span>
+                                    </div>
+                                    <span className="text-slate-500 dark:text-slate-400 font-normal">
+                                        You can send a fresh request below
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={handleRequest}
+                                    className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3.5 text-sm font-semibold text-white shadow-xs transition flex items-center justify-center gap-2 cursor-pointer"
+                                >
+                                    <Send className="w-4 h-4" />
+                                    <span>Send Collaboration Request Again</span>
+                                </button>
+                            </div>
                         ) : null}
 
                         {message && (

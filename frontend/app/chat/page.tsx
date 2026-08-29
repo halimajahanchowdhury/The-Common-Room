@@ -186,6 +186,15 @@ function ChatContent() {
                         }
                     })
                     .catch(() => loadLocalMessages());
+
+                // Also periodically sync sidebar unread counters
+                getChatConversations(token)
+                    .then((convs) => {
+                        if (Array.isArray(convs) && convs.length > 0) {
+                            setConnections(convs);
+                        }
+                    })
+                    .catch(() => {});
                 return;
             }
 
@@ -318,12 +327,25 @@ function ChatContent() {
                                 connections.map((peer: any, idx: number) => {
                                     const peerName = peer.full_name || peer.username;
                                     const isSelected = activePeer && (activePeer.username === peer.username || activePeer.full_name === peer.full_name);
-                                    const peerUnread = getPeerUnreadCount(peer.username || peer.full_name);
+                                    const peerUnread = isSelected
+                                        ? 0
+                                        : typeof peer.unread_count === "number"
+                                        ? peer.unread_count
+                                        : getPeerUnreadCount(peer.username || peer.full_name);
 
                                     return (
                                         <button
                                             key={idx}
-                                            onClick={() => setActivePeer(peer)}
+                                            onClick={() => {
+                                                setActivePeer(peer);
+                                                setConnections((prev) =>
+                                                    prev.map((c) =>
+                                                        (c.username && c.username === peer.username) || (c.full_name && c.full_name === peer.full_name)
+                                                            ? { ...c, unread_count: 0 }
+                                                            : c
+                                                    )
+                                                );
+                                            }}
                                             className={`w-full p-3 rounded-xl flex items-center gap-3 text-left transition cursor-pointer ${
                                                 isSelected 
                                                     ? "bg-indigo-50/80 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50" 
@@ -405,6 +427,18 @@ function ChatContent() {
                                                  (currentUser && (senderLower === currentUser.toLowerCase().trim() || senderFullNameLower === currentUser.toLowerCase().trim())) ||
                                                  (currentFullName && senderFullNameLower === currentFullName.toLowerCase().trim()) ||
                                                  (activePeer && (recipientLower === peerUsernameLower || recipientLower === peerFullNameLower));
+                                             const formatMessageTime = (m: any) => {
+                                                 if (!m) return "";
+                                                 if (m.timestamp) {
+                                                     try {
+                                                         const d = new Date(m.timestamp);
+                                                         if (!isNaN(d.getTime())) {
+                                                             return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                                         }
+                                                     } catch {}
+                                                 }
+                                                 return m.time || "";
+                                             };
 
                                             return (
                                                 <div
@@ -423,7 +457,7 @@ function ChatContent() {
                                                     
                                                     {/* Timestamp & Delivered / Seen Status Receipts */}
                                                     <div className="flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-1 px-1">
-                                                        <span>{msg.time}</span>
+                                                        <span>{formatMessageTime(msg)}</span>
                                                         {isMe && (
                                                             <>
                                                                 <span>•</span>
