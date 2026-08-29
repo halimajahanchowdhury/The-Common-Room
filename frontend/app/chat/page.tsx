@@ -107,6 +107,8 @@ function ChatContent() {
         const connectionsList = Array.from(acceptedPeersMap.values());
         setConnections(connectionsList);
 
+        const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+
         if (peerParam) {
             const peerParamLower = peerParam.toLowerCase().trim();
             const foundInConnections = connectionsList.find((c: any) => 
@@ -115,11 +117,15 @@ function ChatContent() {
             );
             if (foundInConnections) {
                 setActivePeer(foundInConnections);
+            } else if (isDesktop && connectionsList.length > 0) {
+                setActivePeer(connectionsList[0]);
             } else {
                 setActivePeer(null);
             }
-        } else if (connectionsList.length > 0) {
+        } else if (isDesktop && connectionsList.length > 0) {
             setActivePeer(connectionsList[0]);
+        } else {
+            setActivePeer(null);
         }
     };
 
@@ -134,6 +140,8 @@ function ChatContent() {
         } catch {}
 
         const token = localStorage.getItem("access");
+        const isDesktop = typeof window !== "undefined" && window.innerWidth >= 768;
+
         if (token) {
             getProfile(token)
                 .then((prof) => {
@@ -154,10 +162,17 @@ function ChatContent() {
                                 (c.username && c.username.toLowerCase().trim() === peerLower) ||
                                 (c.full_name && c.full_name.toLowerCase().trim() === peerLower)
                             );
-                            if (found) setActivePeer(found);
-                            else setActivePeer(data[0]);
-                        } else {
+                            if (found) {
+                                setActivePeer(found);
+                            } else if (isDesktop) {
+                                setActivePeer(data[0]);
+                            } else {
+                                setActivePeer(null);
+                            }
+                        } else if (isDesktop) {
                             setActivePeer(data[0]);
+                        } else {
+                            setActivePeer(null);
                         }
                     } else {
                         loadLocalConnections(storedName);
