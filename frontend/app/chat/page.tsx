@@ -20,6 +20,7 @@ import {
     User,
     Sparkles,
     Hand,
+    ArrowLeft,
 } from "lucide-react";
 
 function ChatContent() {
@@ -302,11 +303,11 @@ function ChatContent() {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col transition-colors">
             <Navbar />
 
-            <main className="flex-1 p-3 md:p-8 flex items-center justify-center">
-                <div className="w-full max-w-5xl rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex flex-col md:flex-row h-[750px] overflow-hidden">
+            <main className="flex-1 p-2 sm:p-3 md:p-8 flex items-center justify-center">
+                <div className="w-full max-w-5xl rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs flex flex-col md:flex-row h-[calc(100dvh-5.5rem)] md:h-[750px] overflow-hidden">
                     
                     {/* Sidebar Connections List */}
-                    <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800/80 flex flex-col bg-slate-50/50 dark:bg-slate-950/40">
+                    <div className={`w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-100 dark:border-slate-800/80 flex flex-col bg-slate-50/50 dark:bg-slate-950/40 h-full ${activePeer ? "hidden md:flex" : "flex"}`}>
                         <div className="p-4 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900">
                             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                                 <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -376,23 +377,30 @@ function ChatContent() {
                     </div>
 
                     {/* Main Chat Area */}
-                    <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
+                    <div className={`flex-1 flex flex-col bg-white dark:bg-slate-900 h-full ${!activePeer ? "hidden md:flex" : "flex"}`}>
                         {activePeer ? (
                             <>
                                 {/* Peer Header */}
-                                <div className="p-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-white dark:bg-slate-900 z-10">
-                                    <div className="flex items-center gap-3">
+                                <div className="p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between bg-white dark:bg-slate-900 z-10">
+                                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                                        <button
+                                            onClick={() => setActivePeer(null)}
+                                            className="md:hidden p-1.5 -ml-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                                            title="Back to conversations"
+                                        >
+                                            <ArrowLeft className="w-5 h-5" />
+                                        </button>
                                         <Avatar src={activePeer.profile_picture} name={activePeer.full_name || activePeer.username} username={activePeer.username} size="md" />
-                                        <div>
-                                            <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                                        <div className="min-w-0">
+                                            <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate max-w-[140px] sm:max-w-none">
                                                 {activePeer.full_name || activePeer.username}
                                             </h3>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[140px] sm:max-w-none">
                                                 {activePeer.university || "Campus Peer"} • {activePeer.department || "Peer Student"}
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-2.5 sm:px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300 shrink-0">
                                         <Sparkles className="w-3 h-3 text-indigo-500" />
                                         <span>Collaborator</span>
                                     </span>
