@@ -139,7 +139,7 @@ html.dark header.border-b {
     -webkit-backdrop-filter: blur(12px);
 }
 
-/* ==================== HIDE NETLIFY BADGE & DRAWER ==================== */
+/* ==================== HIDE NETLIFY & NEXT.JS DEV BADGES ==================== */
 iframe#netlify-drawer,
 iframe[title*="Netlify"],
 iframe[src*="netlify"],
@@ -148,7 +148,9 @@ iframe[src*="netlify"],
 .netlify-badge,
 div:has(> iframe[title*="Netlify"]),
 div[class*="netlify"],
-div:has(> a[href*="netlify.com"]) {
+div:has(> a[href*="netlify.com"]),
+nextjs-portal,
+[data-nextjs-toast] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;

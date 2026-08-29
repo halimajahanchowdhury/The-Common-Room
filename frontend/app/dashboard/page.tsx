@@ -348,18 +348,21 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Modern Sleek Tab Navigation */}
-                    <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-1 sm:gap-2 p-1 sm:p-1.5 rounded-2xl bg-slate-200/60 dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800">
                         <button
                             onClick={() => setActiveTab("requests")}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-w-0 ${
                                 activeTab === "requests"
                                     ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs"
                                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            <Inbox className="w-4 h-4 shrink-0" />
-                            <span>Collaboration Requests</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                            <Inbox className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                            <span>
+                                <span className="sm:hidden">Requests</span>
+                                <span className="hidden sm:inline">Collaboration Requests</span>
+                            </span>
+                            <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold shrink-0 ${
                                 activeTab === "requests"
                                     ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300"
                                     : "bg-slate-300/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
@@ -370,15 +373,18 @@ export default function DashboardPage() {
 
                         <button
                             onClick={() => setActiveTab("feedback")}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-w-0 ${
                                 activeTab === "feedback"
                                     ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs"
                                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            <MessageSquare className="w-4 h-4 shrink-0" />
-                            <span>Peer Endorsements</span>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                            <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                            <span>
+                                <span className="sm:hidden">Feedback</span>
+                                <span className="hidden sm:inline">Peer Endorsements</span>
+                            </span>
+                            <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold shrink-0 ${
                                 activeTab === "feedback"
                                     ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300"
                                     : "bg-slate-300/60 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
@@ -389,14 +395,17 @@ export default function DashboardPage() {
 
                         <button
                             onClick={() => setActiveTab("activity")}
-                            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap min-w-0 ${
                                 activeTab === "activity"
                                     ? "bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-xs"
                                     : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                             }`}
                         >
-                            <Activity className="w-4 h-4 shrink-0" />
-                            <span>My Overview</span>
+                            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                            <span>
+                                <span className="sm:hidden">Overview</span>
+                                <span className="hidden sm:inline">My Overview</span>
+                            </span>
                         </button>
                     </div>
 
@@ -404,18 +413,18 @@ export default function DashboardPage() {
                     {activeTab === "requests" && (
                         <div className="space-y-6 animate-in fade-in-50 duration-200">
                             {/* Received Collaboration Requests Card */}
-                            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 md:p-8 shadow-xs">
-                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+                            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 md:p-8 shadow-xs">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/80">
                                     <div>
-                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                            <Inbox className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <Inbox className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                                             <span>Received Requests</span>
                                         </h2>
                                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                                             Requests sent to you from peer students across campus.
                                         </p>
                                     </div>
-                                    <span className="inline-flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                                    <span className="inline-flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 self-start sm:self-auto shrink-0">
                                         {receivedRequests.length} Total
                                     </span>
                                 </div>
@@ -495,18 +504,18 @@ export default function DashboardPage() {
                             </div>
 
                             {/* Sent Collaboration Requests Card */}
-                            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 md:p-8 shadow-xs">
-                                <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+                            <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 md:p-8 shadow-xs">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/80">
                                     <div>
-                                        <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                            <Send className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                        <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                            <Send className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                                             <span>Sent Requests</span>
                                         </h2>
                                         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                                             Track requests sent to peers across campus.
                                         </p>
                                     </div>
-                                    <span className="inline-flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                                    <span className="inline-flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 self-start sm:self-auto shrink-0">
                                         {sentRequests.length} Total
                                     </span>
                                 </div>
@@ -578,18 +587,18 @@ export default function DashboardPage() {
 
                     {/* TAB 2: PEER ENDORSEMENTS & FEEDBACK */}
                     {activeTab === "feedback" && (
-                        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
-                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/80">
+                        <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 sm:p-6 md:p-8 shadow-xs animate-in fade-in-50 duration-200">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-slate-800/80">
                                 <div>
-                                    <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                    <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                        <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                                         <span>Peer Endorsements & Feedback</span>
                                     </h2>
                                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                                         Authentic testimonials left on your profile by accepted campus collaborators.
                                     </p>
                                 </div>
-                                <span className="inline-flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                                <span className="inline-flex items-center justify-center rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-bold text-indigo-700 dark:text-indigo-300 self-start sm:self-auto shrink-0">
                                     {comments.length} Endorsement{comments.length === 1 ? "" : "s"}
                                 </span>
                             </div>

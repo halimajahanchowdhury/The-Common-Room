@@ -370,9 +370,9 @@ function ChatContent() {
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/40 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span>Active Peer</span>
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 px-3 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                                        <Sparkles className="w-3 h-3 text-indigo-500" />
+                                        <span>Collaborator</span>
                                     </span>
                                 </div>
 

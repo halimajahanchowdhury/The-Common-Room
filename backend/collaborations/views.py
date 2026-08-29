@@ -110,11 +110,22 @@ class CollaborationStatusView(APIView):
         except (ValueError, TypeError):
             return Response({'error': 'Invalid user ID.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if target_id == request.user.id:
+        # Resolve target User object from either Profile ID or User ID
+        target_user = None
+        try:
+            profile = Profile.objects.get(pk=target_id)
+            target_user = profile.user
+        except Profile.DoesNotExist:
+            try:
+                target_user = User.objects.get(pk=target_id)
+            except User.DoesNotExist:
+                return Response({'status': 'none'}, status=status.HTTP_200_OK)
+
+        if target_user.id == request.user.id:
             return Response({'status': 'self'}, status=status.HTTP_200_OK)
 
         collab = CollaborationRequest.objects.filter(
-            (Q(sender=request.user, receiver_id=target_id) | Q(sender_id=target_id, receiver=request.user))
+            (Q(sender=request.user, receiver=target_user) | Q(sender=target_user, receiver=request.user))
         ).order_by('-created_at').first()
 
         if not collab:

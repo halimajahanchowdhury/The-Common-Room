@@ -127,20 +127,39 @@ export default function StudentsPage() {
 
     const getCollabStatus = (targetStudent: any) => {
         if (!targetStudent) return "none";
-        const targetId = targetStudent.id;
+        const targetUserId = targetStudent.user_id || (typeof targetStudent.user === "number" ? targetStudent.user : targetStudent.user?.id);
         const targetUsername = String(targetStudent.username || "").toLowerCase().trim();
         const targetFullName = String(targetStudent.full_name || "").toLowerCase().trim();
 
         const isMatch = (r: any, isSent: boolean) => {
             if (!r) return false;
-            const peerId = isSent ? (r.receiver || r.receiver_id) : (r.sender || r.sender_id);
-            if (peerId && targetId && (peerId === targetId || peerId?.id === targetId)) return true;
 
-            const peerUser = isSent
+            // 1. Match by User ID if available
+            const peerId = isSent ? (r.receiver || r.receiver_id) : (r.sender || r.sender_id);
+            const peerIdNum = typeof peerId === "number" ? peerId : peerId?.id;
+            if (targetUserId && peerIdNum && targetUserId === peerIdNum) {
+                return true;
+            }
+
+            // 2. Match by Username
+            const peerUsername = isSent
                 ? String(r.to_username || r.receiver_username || r.to_user || "").toLowerCase().trim()
                 : String(r.from_username || r.sender_username || r.from_user || "").toLowerCase().trim();
 
-            return peerUser && (peerUser === targetUsername || peerUser === targetFullName);
+            if (targetUsername && peerUsername && targetUsername === peerUsername) {
+                return true;
+            }
+
+            // 3. Match by Full Name
+            const peerFullName = isSent
+                ? String(r.receiver_full_name || "").toLowerCase().trim()
+                : String(r.sender_full_name || "").toLowerCase().trim();
+
+            if (targetFullName && peerFullName && targetFullName === peerFullName) {
+                return true;
+            }
+
+            return false;
         };
 
         // 1. Check if accepted in either direction

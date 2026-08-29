@@ -28,39 +28,39 @@ export default function HomePage() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white transition-colors">
             {/* Navigation Header */}
-            <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200 dark:border-slate-800 px-6 py-4 transition-colors">
-                <div className="mx-auto flex max-w-6xl items-center justify-between">
+            <header className="bg-white/85 dark:bg-slate-900/85 backdrop-blur-md sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 px-3.5 sm:px-6 py-3 sm:py-4 transition-colors">
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-2">
                     <Link
                         href="/"
-                        className="flex items-center gap-2 text-2xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-800 dark:from-indigo-400 dark:via-violet-400 dark:to-sky-400 bg-clip-text text-transparent tracking-tight hover:opacity-90 transition"
+                        className="flex items-center gap-1.5 sm:gap-2 text-base sm:text-2xl font-black bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-800 dark:from-indigo-400 dark:via-violet-400 dark:to-sky-400 bg-clip-text text-transparent tracking-tight hover:opacity-90 transition shrink-0 whitespace-nowrap"
                     >
-                        <Sparkles className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-indigo-600 dark:text-indigo-400 shrink-0" />
                         <span>The Common Room</span>
                     </Link>
 
-                    <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="flex items-center gap-1.5 sm:gap-4 shrink-0">
                         {isAuthenticated === true ? (
                             <Link
                                 href="/dashboard"
-                                className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer"
+                                className="rounded-xl bg-indigo-600 px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 transition flex items-center gap-1.5 sm:gap-2 cursor-pointer whitespace-nowrap"
                             >
-                                <span>Go to Dashboard</span>
-                                <ArrowRight className="w-4 h-4" />
+                                <span>Dashboard</span>
+                                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                             </Link>
                         ) : (
                             <>
                                 <Link
                                     href="/login"
-                                    className="text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 transition"
+                                    className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 px-2 sm:px-3 py-1.5 sm:py-2 transition whitespace-nowrap"
                                 >
                                     Sign In
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 hover:shadow-indigo-600/30 transition flex items-center gap-2 cursor-pointer"
+                                    className="rounded-xl bg-indigo-600 px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-500 transition flex items-center gap-1 sm:gap-2 cursor-pointer whitespace-nowrap"
                                 >
                                     <span>Get Started</span>
-                                    <ArrowRight className="w-4 h-4" />
+                                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </Link>
                             </>
                         )}

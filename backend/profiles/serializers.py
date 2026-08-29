@@ -13,6 +13,7 @@ def parse_skills(skills_str):
     return skills
 
 class ProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
     skills_can_teach_list = serializers.SerializerMethodField()
@@ -23,6 +24,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = (
             'id',
+            'user_id',
             'username',
             'email',
             'full_name',
