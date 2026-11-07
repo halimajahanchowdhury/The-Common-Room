@@ -12,8 +12,10 @@ export default function LoginPage() {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e && typeof e.preventDefault === "function") {
+            e.preventDefault();
+        }
         setMessage("");
 
         if (!username.trim() || !password.trim()) {
@@ -87,7 +89,14 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form
+                    action="javascript:void(0);"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit(e);
+                    }}
+                    className="space-y-4"
+                >
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                             Username or Email
@@ -119,7 +128,7 @@ export default function LoginPage() {
                         <div className="relative">
                             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
-                                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 pl-10 pr-10 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 pl-10 pr-10 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
                                 placeholder="••••••••"
                                 type={showPassword ? "text" : "password"}
                                 required
@@ -128,8 +137,12 @@ export default function LoginPage() {
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowPassword((prev) => !prev);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg cursor-pointer flex items-center justify-center transition"
                                 title={showPassword ? "Hide password" : "Show password"}
                                 aria-label="Toggle password visibility"
                             >

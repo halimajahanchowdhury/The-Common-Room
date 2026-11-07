@@ -53,9 +53,25 @@ class MessageListCreateView(APIView):
     def post(self, request):
         recipient_param = request.data.get('recipient')
         text = request.data.get('text', '').strip()
+        attachment_url = request.data.get('attachment_url')
+        attachment_name = request.data.get('attachment_name', '')
+        attachment_type = request.data.get('attachment_type', '')
+        attachment_size = request.data.get('attachment_size')
 
-        if not text:
-            return Response({'error': 'Message text cannot be empty.'}, status=status.HTTP_400_BAD_REQUEST)
+        # Handle direct file upload in message POST if present
+        if 'file' in request.FILES:
+            from .storage import upload_chat_attachment
+            try:
+                att_data = upload_chat_attachment(request.FILES['file'], request.user.username, request)
+                attachment_url = att_data['attachment_url']
+                attachment_name = att_data['attachment_name']
+                attachment_type = att_data['attachment_type']
+                attachment_size = att_data['attachment_size']
+            except ValueError as val_err:
+                return Response({'error': str(val_err)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not text and not attachment_url:
+            return Response({'error': 'Message text or attachment is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not recipient_param:
             return Response({'error': 'Recipient field is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -71,11 +87,37 @@ class MessageListCreateView(APIView):
             sender=request.user,
             recipient=recipient_user,
             text=text,
-            status='delivered'
+            status='delivered',
+            attachment_url=attachment_url,
+            attachment_name=attachment_name,
+            attachment_type=attachment_type,
+            attachment_size=attachment_size,
         )
 
         serializer = MessageSerializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ChatAttachmentUploadView(APIView):
+    """
+    Dedicated DRF endpoint for chat attachments with file size (max 10MB)
+    and file type security validation, backed by Cloud Object Storage.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        file_obj = request.FILES.get('file')
+        if not file_obj:
+            return Response({'error': 'No file was provided in the upload request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        from .storage import upload_chat_attachment
+        try:
+            result = upload_chat_attachment(file_obj, request.user.username, request)
+            return Response(result, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'error': 'Failed to process attachment.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ConversationListView(APIView):

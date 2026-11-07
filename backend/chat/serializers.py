@@ -24,6 +24,10 @@ class MessageSerializer(serializers.ModelSerializer):
             'status',
             'timestamp',
             'time',
+            'attachment_url',
+            'attachment_name',
+            'attachment_type',
+            'attachment_size',
         )
         read_only_fields = ('id', 'sender', 'timestamp')
 

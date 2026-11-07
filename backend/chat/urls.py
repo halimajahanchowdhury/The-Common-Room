@@ -4,6 +4,7 @@ from .views import (
     ConversationListView,
     MarkMessagesReadView,
     UnreadCountView,
+    ChatAttachmentUploadView,
 )
 
 urlpatterns = [
@@ -11,4 +12,5 @@ urlpatterns = [
     path('conversations/', ConversationListView.as_view(), name='chat_conversations'),
     path('read/', MarkMessagesReadView.as_view(), name='chat_read'),
     path('unread_count/', UnreadCountView.as_view(), name='chat_unread_count'),
+    path('upload/', ChatAttachmentUploadView.as_view(), name='chat_upload'),
 ]

@@ -353,7 +353,11 @@ export default function StudentsPage() {
                                             {profile.skill_matches?.has_match && (
                                                 <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-900/40 px-3 py-1 text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300">
                                                     <Sparkles className="w-3 h-3 text-emerald-500" />
-                                                    <span>Potential Skill Exchange Match!</span>
+                                                    <span>
+                                                        {profile.skill_matches.match_percentage && profile.skill_matches.match_percentage > 0
+                                                            ? `${profile.skill_matches.match_percentage}% Semantic Skill Match`
+                                                            : "Potential Skill Exchange Match!"}
+                                                    </span>
                                                 </div>
                                             )}
 

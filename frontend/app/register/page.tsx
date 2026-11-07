@@ -34,8 +34,10 @@ export default function RegisterPage() {
     const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
     const canSubmit = validPassword && passwordsMatch && username.trim().length > 0 && email.trim().length > 0;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent) => {
+        if (e && typeof e.preventDefault === "function") {
+            e.preventDefault();
+        }
         setMessage("");
         setIsSuccess(false);
 
@@ -45,19 +47,18 @@ export default function RegisterPage() {
         }
 
         if (!validPassword) {
-            setMessage("Password does not satisfy security requirements.");
+            setMessage("Password does not meet all security requirements. Please check the rules above.");
             return;
         }
 
         if (password !== confirmPassword) {
-            setMessage("Password and Confirm Password do not match.");
+            setMessage("Password and Confirm Password do not match. Please verify.");
             return;
         }
 
         setLoading(true);
 
         try {
-            // Register student account via Django REST API
             const result = await registerUser(username.trim(), email.trim(), password.trim());
 
             if (result && result.error) {
@@ -65,7 +66,8 @@ export default function RegisterPage() {
                 if (typeof errors === "object") {
                     const firstKey = Object.keys(errors)[0];
                     const firstVal = Array.isArray(errors[firstKey]) ? errors[firstKey][0] : errors[firstKey];
-                    setMessage(`${firstKey}: ${firstVal}`);
+                    const formattedKey = firstKey.charAt(0).toUpperCase() + firstKey.slice(1).replace('_', ' ');
+                    setMessage(`${formattedKey}: ${firstVal}`);
                 } else {
                     setMessage(String(result.error));
                 }
@@ -102,7 +104,14 @@ export default function RegisterPage() {
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form
+                    action="javascript:void(0);"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit(e);
+                    }}
+                    className="space-y-4"
+                >
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
                             Username
@@ -143,7 +152,7 @@ export default function RegisterPage() {
                         <div className="relative">
                             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
-                                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 pl-10 pr-10 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition"
+                                className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 pl-10 pr-10 py-3 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
                                 placeholder="Create a password"
                                 type={showPassword ? "text" : "password"}
                                 required
@@ -152,8 +161,12 @@ export default function RegisterPage() {
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowPassword((prev) => !prev);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg cursor-pointer flex items-center justify-center transition"
                                 title={showPassword ? "Hide password" : "Show password"}
                                 aria-label="Toggle password visibility"
                             >
@@ -162,34 +175,32 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Password Requirements Checklist */}
-                    {password.length > 0 && (
-                        <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3.5 text-xs space-y-1.5 transition">
-                            <div className="font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider mb-2">
-                                Password Requirements:
-                            </div>
-                            <div className={`flex items-center gap-2 font-medium ${criteria.length ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
-                                {criteria.length ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                <span>At least 8 characters</span>
-                            </div>
-                            <div className={`flex items-center gap-2 font-medium ${criteria.hasUppercase ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
-                                {criteria.hasUppercase ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                <span>At least one uppercase letter (A-Z)</span>
-                            </div>
-                            <div className={`flex items-center gap-2 font-medium ${criteria.hasLowercase ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
-                                {criteria.hasLowercase ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                <span>At least one lowercase letter (a-z)</span>
-                            </div>
-                            <div className={`flex items-center gap-2 font-medium ${criteria.hasNumber ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
-                                {criteria.hasNumber ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                <span>At least one number (0-9)</span>
-                            </div>
-                            <div className={`flex items-center gap-2 font-medium ${criteria.hasSpecialChar ? "text-emerald-600 dark:text-emerald-400" : "text-slate-500 dark:text-slate-400"}`}>
-                                {criteria.hasSpecialChar ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
-                                <span>At least one special character (!@#$%^&*...)</span>
-                            </div>
+                    {/* Password Requirements Checklist (Always visible so users know the requirements upfront) */}
+                    <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/60 p-3.5 text-xs space-y-1.5 transition">
+                        <div className="font-bold text-slate-700 dark:text-slate-300 text-[11px] uppercase tracking-wider mb-2">
+                            Password Requirements:
                         </div>
-                    )}
+                        <div className={`flex items-center gap-2 font-medium transition-colors ${criteria.length ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                            {criteria.length ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />}
+                            <span>At least 8 characters</span>
+                        </div>
+                        <div className={`flex items-center gap-2 font-medium transition-colors ${criteria.hasUppercase ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                            {criteria.hasUppercase ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />}
+                            <span>At least one uppercase letter (A-Z)</span>
+                        </div>
+                        <div className={`flex items-center gap-2 font-medium transition-colors ${criteria.hasLowercase ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                            {criteria.hasLowercase ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />}
+                            <span>At least one lowercase letter (a-z)</span>
+                        </div>
+                        <div className={`flex items-center gap-2 font-medium transition-colors ${criteria.hasNumber ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                            {criteria.hasNumber ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />}
+                            <span>At least one number (0-9)</span>
+                        </div>
+                        <div className={`flex items-center gap-2 font-medium transition-colors ${criteria.hasSpecialChar ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
+                            {criteria.hasSpecialChar ? <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> : <X className="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 shrink-0" />}
+                            <span>At least one special character (!@#$%^&*...)</span>
+                        </div>
+                    </div>
 
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5">
@@ -198,7 +209,7 @@ export default function RegisterPage() {
                         <div className="relative">
                             <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                             <input
-                                className={`w-full rounded-xl border bg-white dark:bg-slate-950 pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 transition ${
+                                className={`w-full rounded-xl border bg-white dark:bg-slate-950 pl-10 pr-10 py-3 text-sm focus:outline-none focus:ring-2 transition [&::-ms-reveal]:hidden [&::-ms-clear]:hidden ${
                                     confirmPassword.length > 0
                                         ? passwordsMatch
                                             ? "border-emerald-400 dark:border-emerald-700 focus:ring-emerald-500/20"
@@ -213,8 +224,12 @@ export default function RegisterPage() {
                             />
                             <button
                                 type="button"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 cursor-pointer"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setShowConfirmPassword((prev) => !prev);
+                                }}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 z-20 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-lg cursor-pointer flex items-center justify-center transition"
                                 title={showConfirmPassword ? "Hide password" : "Show password"}
                                 aria-label="Toggle confirm password visibility"
                             >
@@ -229,26 +244,27 @@ export default function RegisterPage() {
                         )}
                     </div>
 
+                    {message && (
+                        <div className={`rounded-xl border p-3.5 text-center text-xs font-semibold flex items-center justify-center gap-2 ${
+                            isSuccess
+                                ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                : "border-rose-200 dark:border-rose-900/40 bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
+                        }`}>
+                            {isSuccess ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                            <span>{message}</span>
+                        </div>
+                    )}
+
                     <button
                         className="w-full rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3.5 text-sm font-bold text-white shadow-xs transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                        type="submit"
-                        disabled={loading || !canSubmit}
+                        type="button"
+                        onClick={() => handleSubmit()}
+                        disabled={loading}
                     >
                         <span>{loading ? "Creating Account..." : "Sign Up"}</span>
                         <ArrowRight className="w-4 h-4" />
                     </button>
                 </form>
-
-                {message && (
-                    <div className={`mt-4 rounded-xl border p-3.5 text-center text-xs font-semibold flex items-center justify-center gap-2 ${
-                        isSuccess
-                            ? "border-emerald-200 dark:border-emerald-900/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                            : "border-rose-200 dark:border-rose-900/40 bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400"
-                    }`}>
-                        {isSuccess ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
-                        <span>{message}</span>
-                    </div>
-                )}
 
                 <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                     Already have an account?{" "}

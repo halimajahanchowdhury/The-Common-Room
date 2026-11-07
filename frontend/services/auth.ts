@@ -280,17 +280,52 @@ export const getChatMessages = async (
     return response.data;
 };
 
+export const uploadChatAttachment = async (
+    file: File,
+    token: string
+) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await api.post(
+        "chat/upload/",
+        formData,
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
+    return response.data;
+};
+
 export const sendChatMessage = async (
     recipient: string,
     text: string,
-    token: string
+    token: string,
+    attachment?: {
+        attachment_url?: string;
+        attachment_name?: string;
+        attachment_type?: string;
+        attachment_size?: number;
+    }
 ) => {
+    const payload: any = {
+        recipient,
+        text,
+    };
+
+    if (attachment?.attachment_url) {
+        payload.attachment_url = attachment.attachment_url;
+        payload.attachment_name = attachment.attachment_name || "";
+        payload.attachment_type = attachment.attachment_type || "";
+        payload.attachment_size = attachment.attachment_size || null;
+    }
+
     const response = await api.post(
         "chat/messages/",
-        {
-            recipient,
-            text,
-        },
+        payload,
         {
             headers: {
                 Authorization: `Bearer ${token}`,

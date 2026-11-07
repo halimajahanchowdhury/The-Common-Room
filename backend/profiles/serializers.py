@@ -1,6 +1,7 @@
 import re
 from rest_framework import serializers
 from .models import Profile
+from .embeddings import compute_profile_semantic_match
 
 def parse_skills(skills_str):
     if not skills_str:
@@ -48,33 +49,30 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def get_skill_matches(self, obj):
         request = self.context.get('request')
-        if not request or not request.user or not request.user.is_authenticated:
-            return {
-                'has_match': False,
-                'can_learn_from_peer': [],
-                'can_teach_to_peer': [],
-                'matching_skills': [],
-            }
+        default_res = {
+            'has_match': False,
+            'can_learn_from_peer': [],
+            'can_teach_to_peer': [],
+            'matching_skills': [],
+            'semantic_score': 0.0,
+            'match_percentage': 0,
+            'is_semantic_match': False,
+        }
+
+        user = getattr(request, 'user', None)
+        if not user or not user.is_authenticated:
+            return default_res
 
         # If comparing with self
-        if request.user.id == obj.user.id:
-            return {
-                'has_match': False,
-                'can_learn_from_peer': [],
-                'can_teach_to_peer': [],
-                'matching_skills': [],
-            }
+        if user.id == obj.user.id:
+            return default_res
 
         try:
-            my_profile = request.user.profile
+            my_profile = user.profile
         except AttributeError:
-            return {
-                'has_match': False,
-                'can_learn_from_peer': [],
-                'can_teach_to_peer': [],
-                'matching_skills': [],
-            }
+            return default_res
 
+        # 1. Exact string matches
         my_teach = parse_skills(my_profile.skills_can_teach)
         my_learn = parse_skills(my_profile.skills_want_to_learn)
         target_teach = parse_skills(obj.skills_can_teach)
@@ -95,9 +93,17 @@ class ProfileSerializer(serializers.ModelSerializer):
 
         all_matches = list(dict.fromkeys(can_learn_from_peer + can_teach_to_peer))
 
+        # 2. Semantic vector cosine similarity
+        semantic_res = compute_profile_semantic_match(my_profile, obj)
+
+        has_match = bool((len(all_matches) > 0) or semantic_res['is_semantic_match'])
+
         return {
-            'has_match': len(all_matches) > 0,
+            'has_match': has_match,
             'can_learn_from_peer': can_learn_from_peer,
             'can_teach_to_peer': can_teach_to_peer,
             'matching_skills': all_matches,
+            'semantic_score': float(semantic_res['semantic_score']),
+            'match_percentage': int(semantic_res['match_percentage']),
+            'is_semantic_match': bool(semantic_res['is_semantic_match']),
         }

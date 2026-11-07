@@ -26,3 +26,10 @@ out/
 .DS_Store
 Thumbs.db
 
+# Project Reports & Legacy Backups
+diagrams/
+legacy_src_app_backup/
+generate_*.py
+*locust_results*.csv
+
+

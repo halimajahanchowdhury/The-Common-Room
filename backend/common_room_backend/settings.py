@@ -30,12 +30,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-7*bdply@kuazfecn=($5s
 DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
 
 raw_allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1 .onrender.com')
-ALLOWED_HOSTS = [h.strip() for h in raw_allowed_hosts.split() if h.strip()]
+ALLOWED_HOSTS = ['*'] if DEBUG else [h.strip() for h in raw_allowed_hosts.split() if h.strip()]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -68,9 +70,25 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-raw_cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000')
+# CORS Configuration for local development and network devices (mobile phones on Wi-Fi)
+raw_cors_origins = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:3000,http://127.0.0.1:3000,http://192.168.0.103:3000'
+)
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in raw_cors_origins.split(',') if origin.strip()]
+
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http:\/\/localhost:\d+$",
+    r"^http:\/\/127\.0\.0\.1:\d+$",
+    r"^http:\/\/192\.168\.\d+\.\d+:3000$",
+    r"^http:\/\/10\.\d+\.\d+\.\d+:3000$",
+]
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+
 CORS_ALLOW_CREDENTIALS = True
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -103,6 +121,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'common_room_backend.wsgi.application'
+ASGI_APPLICATION = 'common_room_backend.asgi.application'
 
 
 # Database
@@ -173,3 +192,44 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media files (User uploaded avatars & fallback local storage)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Cloudinary Object Storage configuration
+CLOUDINARY_URL = os.environ.get('CLOUDINARY_URL')
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
+CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET')
+
+if CLOUDINARY_URL or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET):
+    import cloudinary
+    if CLOUDINARY_URL:
+        cloudinary.config(cloudinary_url=CLOUDINARY_URL)
+    else:
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET,
+            secure=True
+        )
+
+
+# Channels Layer configuration (Redis for production / InMemory for local development)
+REDIS_URL = os.environ.get('REDIS_URL')
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+            },
+        },
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from .models import Profile
 from .serializers import ProfileSerializer
+from .embeddings import generate_embedding, compute_cosine_similarity
 
 class MyProfileView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -16,7 +17,23 @@ class MyProfileView(APIView):
 
     def put(self, request):
         profile, created = Profile.objects.get_or_create(user=request.user)
-        serializer = ProfileSerializer(profile, data=request.data, partial=True, context={'request': request})
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+
+        # Offload avatars from Base64 DB text to Cloud Object Storage (Cloudinary/Local)
+        if 'profile_picture' in data:
+            raw_pic = data.get('profile_picture')
+            if raw_pic:
+                from .storage import upload_avatar
+                cleaned_url = upload_avatar(raw_pic, request.user.username, request)
+                data['profile_picture'] = cleaned_url
+            else:
+                data['profile_picture'] = None
+        elif 'profile_picture' in request.FILES:
+            from .storage import upload_avatar
+            cleaned_url = upload_avatar(request.FILES['profile_picture'], request.user.username, request)
+            data['profile_picture'] = cleaned_url
+
+        serializer = ProfileSerializer(profile, data=data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -27,13 +44,13 @@ class ProfileListView(APIView):
 
     def get(self, request):
         # Exclude active logged-in user
-        profiles = Profile.objects.exclude(user=request.user)
+        profiles_qs = Profile.objects.exclude(user=request.user)
 
         search_query = request.query_params.get('search', '').strip()
         skill_query = request.query_params.get('skill', '').strip()
 
         if search_query:
-            profiles = profiles.filter(
+            profiles_qs = profiles_qs.filter(
                 Q(full_name__icontains=search_query) |
                 Q(user__username__icontains=search_query) |
                 Q(university__icontains=search_query) |
@@ -44,12 +61,36 @@ class ProfileListView(APIView):
             )
 
         if skill_query:
-            profiles = profiles.filter(
+            profiles_qs = profiles_qs.filter(
                 Q(skills_can_teach__icontains=skill_query) |
                 Q(skills_want_to_learn__icontains=skill_query)
             )
 
-        serializer = ProfileSerializer(profiles, many=True, context={'request': request})
+        profiles_list = list(profiles_qs)
+
+        # Rank candidate matches by cosine similarity
+        try:
+            my_profile = request.user.profile
+            my_learn_vec = getattr(my_profile, 'learn_embedding', None)
+            if not my_learn_vec and my_profile.skills_want_to_learn:
+                my_learn_vec = generate_embedding(my_profile.skills_want_to_learn)
+
+            if my_learn_vec:
+                def get_similarity(p):
+                    t_vec = getattr(p, 'teach_embedding', None)
+                    if not t_vec and p.skills_can_teach:
+                        t_vec = generate_embedding(p.skills_can_teach)
+                    return compute_cosine_similarity(my_learn_vec, t_vec)
+
+                # Sort by cosine similarity descending, then by newest ID
+                profiles_list.sort(key=lambda p: (round(get_similarity(p), 4), p.id), reverse=True)
+            else:
+                # Default to newest members first
+                profiles_list.sort(key=lambda p: p.id, reverse=True)
+        except Exception:
+            profiles_list.sort(key=lambda p: p.id, reverse=True)
+
+        serializer = ProfileSerializer(profiles_list, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class ProfileDetailView(APIView):

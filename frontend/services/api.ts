@@ -1,13 +1,26 @@
 import axios from "axios";
 
+const getBaseURL = () => {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+        return process.env.NEXT_PUBLIC_API_URL;
+    }
+    if (typeof window !== "undefined" && window.location.hostname) {
+        return `http://${window.location.hostname}:8000/api/`;
+    }
+    return "http://127.0.0.1:8000/api/";
+};
+
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/",
+    baseURL: getBaseURL(),
 });
 
-// Request interceptor to automatically attach authorization header if present
+// Request interceptor to attach authorization header and dynamically sync hostname
 api.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
+            if (!process.env.NEXT_PUBLIC_API_URL && window.location.hostname) {
+                config.baseURL = `http://${window.location.hostname}:8000/api/`;
+            }
             const token = localStorage.getItem("access");
             if (token && !config.headers.Authorization) {
                 config.headers.Authorization = `Bearer ${token}`;
