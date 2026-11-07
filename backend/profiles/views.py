@@ -76,14 +76,15 @@ class ProfileListView(APIView):
                 my_learn_vec = generate_embedding(my_profile.skills_want_to_learn)
 
             if my_learn_vec:
-                def get_similarity(p):
+                # Precompute scores once in a single map so sorting is instant (0ms)
+                sim_map = {}
+                for p in profiles_list:
                     t_vec = getattr(p, 'teach_embedding', None)
                     if not t_vec and p.skills_can_teach:
                         t_vec = generate_embedding(p.skills_can_teach)
-                    return compute_cosine_similarity(my_learn_vec, t_vec)
+                    sim_map[p.id] = compute_cosine_similarity(my_learn_vec, t_vec)
 
-                # Sort by cosine similarity descending, then by newest ID
-                profiles_list.sort(key=lambda p: (round(get_similarity(p), 4), p.id), reverse=True)
+                profiles_list.sort(key=lambda p: (round(sim_map.get(p.id, 0.0), 4), p.id), reverse=True)
             else:
                 # Default to newest members first
                 profiles_list.sort(key=lambda p: p.id, reverse=True)

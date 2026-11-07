@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 from django.conf import settings
-from django.conf.urls.static import static
+from django.views.static import serve
 from rest_framework_simplejwt.views import TokenRefreshView
 from accounts.views import CustomTokenObtainPairView
 from posts.views import CommentDeleteView
@@ -20,7 +20,7 @@ urlpatterns = [
     path('api/posts/', include('posts.urls')),
     path('api/comments/<int:pk>/', CommentDeleteView.as_view(), name='comment_delete'),
     path('api/chat/', include('chat.urls')),
-]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Serve user uploads & media files in both development and production environments
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

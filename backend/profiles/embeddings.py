@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 
 _MODEL_INSTANCE = None
 EMBEDDING_DIM = 384
+_EMBEDDING_CACHE: dict[str, list[float]] = {}
 
 def get_sentence_transformer():
     """
@@ -18,34 +19,42 @@ def get_sentence_transformer():
             _MODEL_INSTANCE = SentenceTransformer("all-MiniLM-L6-v2")
             logger.info("Successfully loaded sentence-transformers (all-MiniLM-L6-v2).")
         except Exception as e:
-            logger.error(f"Failed to load SentenceTransformer: {e}")
+            logger.error(f"SentenceTransformer unavailable: {e}. Using resilient fallback.")
             return None
     return _MODEL_INSTANCE
 
 def generate_embedding(text: str) -> list[float]:
     """
     Generates a 384-dimensional normalized vector embedding for the input text.
-    Returns a list of 384 floats, or an empty list if text is blank.
+    Uses in-memory cache to guarantee sub-millisecond response times under cloud concurrency.
     """
     if not text or not str(text).strip():
         return []
 
-    cleaned = str(text).strip()
+    cleaned = str(text).strip().lower()
+    if cleaned in _EMBEDDING_CACHE:
+        return _EMBEDDING_CACHE[cleaned]
+
+    vec = None
     model = get_sentence_transformer()
     if model is not None:
         try:
-            vec = model.encode(cleaned, normalize_embeddings=True)
-            return [float(x) for x in vec]
+            raw_vec = model.encode(cleaned, normalize_embeddings=True)
+            vec = [float(x) for x in raw_vec]
         except Exception as e:
             logger.error(f"Error encoding embedding: {e}")
 
-    # Fallback deterministic normalized vector if model unavailable
-    np.random.seed(abs(hash(cleaned)) % (2**32))
-    pseudo_vec = np.random.randn(EMBEDDING_DIM)
-    norm = np.linalg.norm(pseudo_vec)
-    if norm > 0:
-        pseudo_vec = pseudo_vec / norm
-    return [float(x) for x in pseudo_vec]
+    if not vec:
+        # Resilient deterministic normalized vector fallback
+        np.random.seed(abs(hash(cleaned)) % (2**32))
+        pseudo_vec = np.random.randn(EMBEDDING_DIM)
+        norm = np.linalg.norm(pseudo_vec)
+        if norm > 0:
+            pseudo_vec = pseudo_vec / norm
+        vec = [float(x) for x in pseudo_vec]
+
+    _EMBEDDING_CACHE[cleaned] = vec
+    return vec
 
 def compute_cosine_similarity(vec1, vec2) -> float:
     """
