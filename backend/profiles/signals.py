@@ -16,3 +16,4 @@ def create_or_update_user_profile(sender, instance, created, **kwargs):
                 instance.profile.save()
             except Exception as e:
                 logger.error(f"Error saving profile for user {instance.username}: {e}")
+

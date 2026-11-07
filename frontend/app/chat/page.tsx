@@ -30,6 +30,7 @@ import {
     File,
     Loader2,
     Image as ImageIcon,
+    ExternalLink,
 } from "lucide-react";
 
 function ChatContent() {
@@ -128,7 +129,7 @@ function ChatContent() {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+            setTimeout(() => window.URL.revokeObjectURL(blobUrl), 60000);
         } catch {
             const link = document.createElement("a");
             link.href = url;
@@ -921,6 +922,16 @@ function ChatContent() {
                             </div>
 
                             <div className="flex items-center gap-2 shrink-0">
+                                <a
+                                    href={previewModal.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-200/80 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 transition cursor-pointer"
+                                    title="Open document in a new tab"
+                                >
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Open in Tab</span>
+                                </a>
                                 <button
                                     type="button"
                                     onClick={() => handleDownload(previewModal.url, previewModal.name)}
@@ -971,30 +982,46 @@ function ChatContent() {
                                             <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
                                             <p className="text-xs font-semibold">Loading document preview...</p>
                                         </div>
-                                    ) : pdfBlobUrl ? (
-                                        <iframe
-                                            src={pdfBlobUrl}
-                                            title={previewModal.name}
-                                            className="w-full h-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white"
-                                        />
                                     ) : (
-                                        <div className="p-8 text-center max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
-                                            <FileText className="w-12 h-12 text-indigo-500 mx-auto mb-3" />
-                                            <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate mb-1">
-                                                {previewModal.name}
-                                            </h4>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
-                                                Click download to save this PDF directly to your device without leaving the chat.
-                                            </p>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleDownload(previewModal.url, previewModal.name)}
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-xs transition cursor-pointer"
-                                            >
-                                                <Download className="w-4 h-4" />
-                                                <span>Download PDF</span>
-                                            </button>
-                                        </div>
+                                        <object
+                                            data={pdfBlobUrl || previewModal.url}
+                                            type="application/pdf"
+                                            className="w-full h-full rounded-lg bg-white shadow-xs"
+                                        >
+                                            <embed
+                                                src={pdfBlobUrl || previewModal.url}
+                                                type="application/pdf"
+                                                className="w-full h-full rounded-lg"
+                                            />
+                                            <div className="p-8 text-center max-w-md bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mx-auto">
+                                                <FileText className="w-12 h-12 text-indigo-500 mx-auto mb-3" />
+                                                <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate mb-1">
+                                                    {previewModal.name}
+                                                </h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
+                                                    This PDF is ready to view. Click below to open or download it.
+                                                </p>
+                                                <div className="flex items-center justify-center gap-3">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleDownload(previewModal.url, previewModal.name)}
+                                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-xs transition cursor-pointer"
+                                                    >
+                                                        <Download className="w-4 h-4" />
+                                                        <span>Download PDF</span>
+                                                    </button>
+                                                    <a
+                                                        href={previewModal.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition cursor-pointer"
+                                                    >
+                                                        <ExternalLink className="w-4 h-4" />
+                                                        <span>Open in Tab</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </object>
                                     )}
                                 </div>
                             ) : (
