@@ -70,17 +70,18 @@ class ProfileListView(APIView):
 
         # Rank candidate matches by cosine similarity
         try:
+            from .embeddings import is_empty_vector
             my_profile = request.user.profile
             my_learn_vec = getattr(my_profile, 'learn_embedding', None)
-            if not my_learn_vec and my_profile.skills_want_to_learn:
+            if is_empty_vector(my_learn_vec) and getattr(my_profile, 'skills_want_to_learn', None):
                 my_learn_vec = generate_embedding(my_profile.skills_want_to_learn)
 
-            if my_learn_vec:
+            if not is_empty_vector(my_learn_vec):
                 # Precompute scores once in a single map so sorting is instant (0ms)
                 sim_map = {}
                 for p in profiles_list:
                     t_vec = getattr(p, 'teach_embedding', None)
-                    if not t_vec and p.skills_can_teach:
+                    if is_empty_vector(t_vec) and getattr(p, 'skills_can_teach', None):
                         t_vec = generate_embedding(p.skills_can_teach)
                     sim_map[p.id] = compute_cosine_similarity(my_learn_vec, t_vec)
 

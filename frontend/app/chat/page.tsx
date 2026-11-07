@@ -46,6 +46,7 @@ function ChatContent() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [filePreview, setFilePreview] = useState<string | null>(null);
     const [uploadingAttachment, setUploadingAttachment] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const [previewModal, setPreviewModal] = useState<{
         url: string;
         name: string;
@@ -116,6 +117,9 @@ function ChatContent() {
         setDownloading(true);
         try {
             const res = await fetch(url);
+            if (!res.ok) {
+                throw new Error(`Download response status: ${res.status}`);
+            }
             const blob = await res.blob();
             const blobUrl = window.URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -140,8 +144,20 @@ function ChatContent() {
 
     const resolveAttachmentUrl = (url?: string | null) => {
         if (!url) return "";
-        if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
+        // Clean legacy local IP or testserver URLs to live backend
+        if (url.includes(":8000/media/") || url.includes("testserver/media/") || url.startsWith("http://thecommonroom-backend.onrender.com")) {
+            const mediaPath = url.substring(url.indexOf("/media/"));
+            let base = "https://thecommonroom-backend.onrender.com";
+            if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+                base = "http://localhost:8000";
+            }
+            return `${base}${mediaPath}`;
+        }
+        if (url.startsWith("https://") || url.startsWith("data:")) {
             return url;
+        }
+        if (url.startsWith("http://")) {
+            return url.replace("http://", "https://");
         }
         let apiHost = "https://thecommonroom-backend.onrender.com";
         if (process.env.NEXT_PUBLIC_API_URL) {
@@ -152,7 +168,7 @@ function ChatContent() {
                 apiHost = `http://${host}:8000`;
             }
         }
-        return `${apiHost}${url}`;
+        return `${apiHost}${url.startsWith("/") ? "" : "/"}${url}`;
     };
 
     const formatBytes = (bytes?: number | null) => {
@@ -315,6 +331,7 @@ function ChatContent() {
     };
 
     useEffect(() => {
+        setIsMounted(true);
         const storedName = localStorage.getItem("user_name") || "Student";
         setCurrentUser(storedName);
 
@@ -535,6 +552,20 @@ function ChatContent() {
             return 0;
         }
     };
+
+    if (!isMounted) {
+        return (
+            <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col overflow-hidden transition-colors">
+                <Navbar />
+                <div className="flex-1 flex items-center justify-center p-8">
+                    <div className="flex flex-col items-center gap-3 text-slate-400">
+                        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                        <p className="text-xs font-semibold">Loading messages...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col overflow-hidden transition-colors">

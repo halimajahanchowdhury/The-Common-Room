@@ -54,6 +54,7 @@ export default function DashboardPage() {
     const [receivedRequests, setReceivedRequests] = useState<any[]>([]);
     const [comments, setComments] = useState<any[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
     const loadRequests = (storedName: string) => {
         const token = localStorage.getItem("access");
@@ -110,6 +111,14 @@ export default function DashboardPage() {
     useEffect(() => {
         const token = localStorage.getItem("access");
         const storedName = localStorage.getItem("user_name") || "Student";
+        const storedProfile = localStorage.getItem("user_profile");
+        if (storedProfile) {
+            try {
+                const parsed = JSON.parse(storedProfile);
+                setProfile({ ...parsed, full_name: parsed.full_name || storedName });
+            } catch {}
+        }
+        setIsMounted(true);
 
         loadRequests(storedName);
 
@@ -208,6 +217,20 @@ export default function DashboardPage() {
 
     const teachSkillsCount = profile?.skills_can_teach ? profile.skills_can_teach.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).length : 0;
     const learnSkillsCount = profile?.skills_want_to_learn ? profile.skills_want_to_learn.split(/[,;\n\r|•]+/).filter((s: string) => s.trim()).length : 0;
+
+    if (!isMounted) {
+        return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col transition-colors">
+                <Navbar />
+                <div className="flex-1 flex items-center justify-center p-8">
+                    <div className="flex flex-col items-center gap-3 text-slate-400">
+                        <Sparkles className="w-8 h-8 text-indigo-500 animate-pulse" />
+                        <p className="text-xs font-semibold">Loading dashboard...</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col transition-colors">

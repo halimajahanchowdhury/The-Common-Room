@@ -33,6 +33,10 @@ raw_allowed_hosts = os.environ.get('ALLOWED_HOSTS', 'localhost 127.0.0.1 .onrend
 ALLOWED_HOSTS = ['*'] if DEBUG else [h.strip() for h in raw_allowed_hosts.split() if h.strip()]
 
 
+# Security headers for reverse proxies (Render / Cloudflare)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
 # Application definition
 
 INSTALLED_APPS = [

@@ -56,20 +56,29 @@ def generate_embedding(text: str) -> list[float]:
     _EMBEDDING_CACHE[cleaned] = vec
     return vec
 
+def is_empty_vector(v) -> bool:
+    """Safe check for None, empty list, or empty NumPy array without ambiguity error."""
+    if v is None:
+        return True
+    try:
+        return len(v) == 0
+    except Exception:
+        return True
+
 def compute_cosine_similarity(vec1, vec2) -> float:
     """
     Computes cosine similarity between two 1D numeric vectors.
     Returns a float between 0.0 and 1.0 (clamped).
     """
-    if not vec1 or not vec2:
+    if is_empty_vector(vec1) or is_empty_vector(vec2):
         return 0.0
 
     try:
         a = np.asarray(vec1, dtype=np.float32)
         b = np.asarray(vec2, dtype=np.float32)
 
-        norm_a = np.linalg.norm(a)
-        norm_b = np.linalg.norm(b)
+        norm_a = float(np.linalg.norm(a))
+        norm_b = float(np.linalg.norm(b))
 
         if norm_a == 0.0 or norm_b == 0.0:
             return 0.0
@@ -77,7 +86,7 @@ def compute_cosine_similarity(vec1, vec2) -> float:
         dot_prod = float(np.dot(a, b))
         similarity = dot_prod / (norm_a * norm_b)
         # Clamp to [0.0, 1.0] for skill matching percentage
-        return max(0.0, min(1.0, similarity))
+        return max(0.0, min(1.0, float(similarity)))
     except Exception as e:
         logger.error(f"Error computing cosine similarity: {e}")
         return 0.0
@@ -88,38 +97,48 @@ def compute_profile_semantic_match(my_profile, target_profile) -> dict:
     - How well target's teaching skills match my learning skills
     - How well my teaching skills match target's learning skills
     """
-    # 1. Learn from peer match (my_learn <-> target_teach)
-    my_learn_vec = getattr(my_profile, 'learn_embedding', None)
-    target_teach_vec = getattr(target_profile, 'teach_embedding', None)
-
-    # If embeddings not precomputed on model, generate on-the-fly
-    if not my_learn_vec and my_profile.skills_want_to_learn:
-        my_learn_vec = generate_embedding(my_profile.skills_want_to_learn)
-    if not target_teach_vec and target_profile.skills_can_teach:
-        target_teach_vec = generate_embedding(target_profile.skills_can_teach)
-
-    sim_learn = compute_cosine_similarity(my_learn_vec, target_teach_vec)
-
-    # 2. Teach to peer match (my_teach <-> target_learn)
-    my_teach_vec = getattr(my_profile, 'teach_embedding', None)
-    target_learn_vec = getattr(target_profile, 'learn_embedding', None)
-
-    if not my_teach_vec and my_profile.skills_can_teach:
-        my_teach_vec = generate_embedding(my_profile.skills_can_teach)
-    if not target_learn_vec and target_profile.skills_want_to_learn:
-        target_learn_vec = generate_embedding(target_profile.skills_want_to_learn)
-
-    sim_teach = compute_cosine_similarity(my_teach_vec, target_learn_vec)
-
-    # Best bidirectional match score
-    best_sim = max(sim_learn, sim_teach)
-    match_percentage = int(round(best_sim * 100))
-
-    return {
-        'semantic_score': round(best_sim, 4),
-        'match_percentage': match_percentage,
-        'learn_from_peer_similarity': round(sim_learn, 4),
-        'teach_to_peer_similarity': round(sim_teach, 4),
-        'is_semantic_match': best_sim >= 0.40,  # 40%+ cosine similarity indicates semantic relevance
+    default_result = {
+        'semantic_score': 0.0,
+        'match_percentage': 0,
+        'learn_from_peer_similarity': 0.0,
+        'teach_to_peer_similarity': 0.0,
+        'is_semantic_match': False,
     }
+
+    try:
+        # 1. Learn from peer match (my_learn <-> target_teach)
+        my_learn_vec = getattr(my_profile, 'learn_embedding', None)
+        target_teach_vec = getattr(target_profile, 'teach_embedding', None)
+
+        if is_empty_vector(my_learn_vec) and getattr(my_profile, 'skills_want_to_learn', None):
+            my_learn_vec = generate_embedding(my_profile.skills_want_to_learn)
+        if is_empty_vector(target_teach_vec) and getattr(target_profile, 'skills_can_teach', None):
+            target_teach_vec = generate_embedding(target_profile.skills_can_teach)
+
+        sim_learn = compute_cosine_similarity(my_learn_vec, target_teach_vec)
+
+        # 2. Teach to peer match (my_teach <-> target_learn)
+        my_teach_vec = getattr(my_profile, 'teach_embedding', None)
+        target_learn_vec = getattr(target_profile, 'learn_embedding', None)
+
+        if is_empty_vector(my_teach_vec) and getattr(my_profile, 'skills_can_teach', None):
+            my_teach_vec = generate_embedding(my_profile.skills_can_teach)
+        if is_empty_vector(target_learn_vec) and getattr(target_profile, 'skills_want_to_learn', None):
+            target_learn_vec = generate_embedding(target_profile.skills_want_to_learn)
+
+        sim_teach = compute_cosine_similarity(my_teach_vec, target_learn_vec)
+
+        best_sim = max(float(sim_learn), float(sim_teach))
+        match_percentage = int(round(best_sim * 100))
+
+        return {
+            'semantic_score': round(best_sim, 4),
+            'match_percentage': match_percentage,
+            'learn_from_peer_similarity': round(float(sim_learn), 4),
+            'teach_to_peer_similarity': round(float(sim_teach), 4),
+            'is_semantic_match': bool(best_sim >= 0.40),
+        }
+    except Exception as e:
+        logger.error(f"Error computing profile semantic match: {e}")
+        return default_result
 

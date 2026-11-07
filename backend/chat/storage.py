@@ -108,10 +108,7 @@ def upload_chat_attachment(file_obj, username: str, request=None) -> dict:
             f.write(chunk)
 
     media_url = f"{settings.MEDIA_URL.rstrip('/')}/chat_attachments/{filename}"
-    if request is not None and hasattr(request, 'build_absolute_uri'):
-        full_url = request.build_absolute_uri(media_url)
-    else:
-        full_url = media_url
+    full_url = media_url
 
     return {
         'attachment_url': full_url,

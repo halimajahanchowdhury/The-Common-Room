@@ -94,16 +94,23 @@ class ProfileSerializer(serializers.ModelSerializer):
         all_matches = list(dict.fromkeys(can_learn_from_peer + can_teach_to_peer))
 
         # 2. Semantic vector cosine similarity
-        semantic_res = compute_profile_semantic_match(my_profile, obj)
+        try:
+            semantic_res = compute_profile_semantic_match(my_profile, obj)
+        except Exception:
+            semantic_res = {
+                'semantic_score': 0.0,
+                'match_percentage': 0,
+                'is_semantic_match': False,
+            }
 
-        has_match = bool((len(all_matches) > 0) or semantic_res['is_semantic_match'])
+        has_match = bool((len(all_matches) > 0) or semantic_res.get('is_semantic_match', False))
 
         return {
             'has_match': has_match,
             'can_learn_from_peer': can_learn_from_peer,
             'can_teach_to_peer': can_teach_to_peer,
             'matching_skills': all_matches,
-            'semantic_score': float(semantic_res['semantic_score']),
-            'match_percentage': int(semantic_res['match_percentage']),
-            'is_semantic_match': bool(semantic_res['is_semantic_match']),
+            'semantic_score': float(semantic_res.get('semantic_score', 0.0)),
+            'match_percentage': int(semantic_res.get('match_percentage', 0)),
+            'is_semantic_match': bool(semantic_res.get('is_semantic_match', False)),
         }
