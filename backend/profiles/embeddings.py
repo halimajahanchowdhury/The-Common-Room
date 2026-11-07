@@ -1,3 +1,5 @@
+import os
+import re
 import logging
 import numpy as np
 
@@ -7,11 +9,24 @@ _MODEL_INSTANCE = None
 EMBEDDING_DIM = 384
 _EMBEDDING_CACHE: dict[str, list[float]] = {}
 
+CONCEPT_CLUSTERS = {
+    'ai_ml': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural networks', 'nlp', 'data science', 'computer vision'],
+    'web': ['web', 'react', 'next.js', 'javascript', 'typescript', 'frontend', 'html', 'css', 'vue', 'angular', 'node'],
+    'backend': ['backend', 'django', 'python', 'fastapi', 'flask', 'sql', 'postgresql', 'database', 'api', 'docker'],
+    'systems': ['c++', 'c', 'rust', 'operating systems', 'linux', 'embedded', 'hardware', 'assembly'],
+    'math': ['math', 'mathematics', 'calculus', 'linear algebra', 'statistics', 'probability', 'discrete'],
+    'design': ['design', 'ui', 'ux', 'figma', 'graphic design', 'photoshop', 'illustrator'],
+}
+
 def get_sentence_transformer():
     """
     Lazy-loads and caches the sentence-transformers model instance.
     Uses 'all-MiniLM-L6-v2' (384 dimensions, fast and lightweight).
+    On Render 512MB free tier, skips heavy PyTorch to prevent Out-Of-Memory crashes.
     """
+    if os.environ.get('RENDER') or os.environ.get('DISABLE_HEAVY_EMBEDDING') == '1':
+        return None
+
     global _MODEL_INSTANCE
     if _MODEL_INSTANCE is None:
         try:
@@ -45,13 +60,25 @@ def generate_embedding(text: str) -> list[float]:
             logger.error(f"Error encoding embedding: {e}")
 
     if not vec:
-        # Resilient deterministic normalized vector fallback
-        np.random.seed(abs(hash(cleaned)) % (2**32))
-        pseudo_vec = np.random.randn(EMBEDDING_DIM)
-        norm = np.linalg.norm(pseudo_vec)
+        # Resilient deterministic normalized vector projection with semantic clustering
+        words = re.findall(r'\b\w+\b', cleaned)
+        arr = np.zeros(EMBEDDING_DIM, dtype=np.float32)
+        for w in words:
+            h = abs(hash(w)) % (2**32)
+            np.random.seed(h)
+            arr += np.random.randn(EMBEDDING_DIM).astype(np.float32) * 0.3
+
+        for c_idx, (cluster, keywords) in enumerate(CONCEPT_CLUSTERS.items()):
+            start_idx = (c_idx * 50) % EMBEDDING_DIM
+            end_idx = min(start_idx + 50, EMBEDDING_DIM)
+            for kw in keywords:
+                if kw in cleaned or any(w in kw.split() for w in words):
+                    arr[start_idx:end_idx] += 1.5
+
+        norm = float(np.linalg.norm(arr))
         if norm > 0:
-            pseudo_vec = pseudo_vec / norm
-        vec = [float(x) for x in pseudo_vec]
+            arr = arr / norm
+        vec = [float(x) for x in arr]
 
     _EMBEDDING_CACHE[cleaned] = vec
     return vec
