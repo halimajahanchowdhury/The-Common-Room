@@ -24,3 +24,5 @@ urlpatterns = [
     # Serve user uploads & media files in both development and production environments
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
+
+handler500 = 'common_room_backend.views.custom_500'
