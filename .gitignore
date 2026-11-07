@@ -31,5 +31,6 @@ diagrams/
 legacy_src_app_backup/
 generate_*.py
 *locust_results*.csv
+*.pdf
 
 
