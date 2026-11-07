@@ -5,9 +5,6 @@ const isLocalHostname = (host: string) => {
 };
 
 const getBaseURL = () => {
-    if (process.env.NEXT_PUBLIC_API_URL) {
-        return process.env.NEXT_PUBLIC_API_URL;
-    }
     if (typeof window !== "undefined" && window.location.hostname) {
         const host = window.location.hostname;
         if (isLocalHostname(host)) {
@@ -15,11 +12,15 @@ const getBaseURL = () => {
         }
         return "https://thecommonroom-backend.onrender.com/api/";
     }
+    if (process.env.NEXT_PUBLIC_API_URL) {
+        return process.env.NEXT_PUBLIC_API_URL;
+    }
     return "https://thecommonroom-backend.onrender.com/api/";
 };
 
 const api = axios.create({
     baseURL: getBaseURL(),
+    timeout: 15000, // 15s timeout to prevent buttons from hanging forever
 });
 
 // Request interceptor to attach authorization header and dynamically sync hostname
@@ -27,12 +28,10 @@ api.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
             const host = window.location.hostname;
-            if (!process.env.NEXT_PUBLIC_API_URL) {
-                if (isLocalHostname(host)) {
-                    config.baseURL = `http://${host}:8000/api/`;
-                } else {
-                    config.baseURL = "https://thecommonroom-backend.onrender.com/api/";
-                }
+            if (isLocalHostname(host)) {
+                config.baseURL = `http://${host}:8000/api/`;
+            } else {
+                config.baseURL = "https://thecommonroom-backend.onrender.com/api/";
             }
             const token = localStorage.getItem("access");
             if (token && !config.headers.Authorization) {

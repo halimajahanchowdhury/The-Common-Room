@@ -70,23 +70,24 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# CORS Configuration for local development and network devices (mobile phones on Wi-Fi)
+# CORS Configuration for local development, mobile Wi-Fi, and live cloud deployments (Vercel & Netlify)
 raw_cors_origins = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:3000,http://127.0.0.1:3000,http://192.168.0.103:3000'
+    'https://thecommonroom-hub.vercel.app,https://thecommonroom-hub.netlify.app,http://localhost:3000,http://127.0.0.1:3000,http://192.168.0.103:3000'
 )
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in raw_cors_origins.split(',') if origin.strip()]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https:\/\/.*\.vercel\.app$",
+    r"^https:\/\/.*\.netlify\.app$",
     r"^http:\/\/localhost:\d+$",
     r"^http:\/\/127\.0\.0\.1:\d+$",
     r"^http:\/\/192\.168\.\d+\.\d+:3000$",
     r"^http:\/\/10\.\d+\.\d+\.\d+:3000$",
 ]
 
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
-
+# Allow all origins for the stateless JWT REST API to guarantee cross-domain reliability
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
