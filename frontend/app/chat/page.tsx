@@ -143,11 +143,14 @@ function ChatContent() {
         if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:")) {
             return url;
         }
-        let apiHost = "http://127.0.0.1:8000";
-        if (typeof window !== "undefined" && window.location.hostname && !process.env.NEXT_PUBLIC_API_URL) {
-            apiHost = `http://${window.location.hostname}:8000`;
-        } else if (process.env.NEXT_PUBLIC_API_URL) {
+        let apiHost = "https://thecommonroom-backend.onrender.com";
+        if (process.env.NEXT_PUBLIC_API_URL) {
             apiHost = process.env.NEXT_PUBLIC_API_URL.replace(/\/api\/?$/, "");
+        } else if (typeof window !== "undefined" && window.location.hostname) {
+            const host = window.location.hostname;
+            if (host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.") || host.startsWith("10.")) {
+                apiHost = `http://${host}:8000`;
+            }
         }
         return `${apiHost}${url}`;
     };

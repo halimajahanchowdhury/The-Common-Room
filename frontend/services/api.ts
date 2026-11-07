@@ -1,13 +1,21 @@
 import axios from "axios";
 
+const isLocalHostname = (host: string) => {
+    return host === "localhost" || host === "127.0.0.1" || host.startsWith("192.168.") || host.startsWith("10.");
+};
+
 const getBaseURL = () => {
     if (process.env.NEXT_PUBLIC_API_URL) {
         return process.env.NEXT_PUBLIC_API_URL;
     }
     if (typeof window !== "undefined" && window.location.hostname) {
-        return `http://${window.location.hostname}:8000/api/`;
+        const host = window.location.hostname;
+        if (isLocalHostname(host)) {
+            return `http://${host}:8000/api/`;
+        }
+        return "https://thecommonroom-backend.onrender.com/api/";
     }
-    return "http://127.0.0.1:8000/api/";
+    return "https://thecommonroom-backend.onrender.com/api/";
 };
 
 const api = axios.create({
@@ -18,8 +26,13 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         if (typeof window !== "undefined") {
-            if (!process.env.NEXT_PUBLIC_API_URL && window.location.hostname) {
-                config.baseURL = `http://${window.location.hostname}:8000/api/`;
+            const host = window.location.hostname;
+            if (!process.env.NEXT_PUBLIC_API_URL) {
+                if (isLocalHostname(host)) {
+                    config.baseURL = `http://${host}:8000/api/`;
+                } else {
+                    config.baseURL = "https://thecommonroom-backend.onrender.com/api/";
+                }
             }
             const token = localStorage.getItem("access");
             if (token && !config.headers.Authorization) {

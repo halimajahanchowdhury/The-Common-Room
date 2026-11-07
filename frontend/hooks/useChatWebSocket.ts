@@ -43,20 +43,25 @@ export function useChatWebSocket({
         }
 
         // Determine correct ws/wss protocol and host
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api";
+        let apiBase = "https://thecommonroom-backend.onrender.com/api";
+        if (process.env.NEXT_PUBLIC_API_URL) {
+            apiBase = process.env.NEXT_PUBLIC_API_URL;
+        } else if (typeof window !== "undefined" && window.location.hostname) {
+            const h = window.location.hostname;
+            if (h === "localhost" || h === "127.0.0.1" || h.startsWith("192.168.") || h.startsWith("10.")) {
+                apiBase = `http://${h}:8000/api`;
+            }
+        }
+
         const isSecure = apiBase.startsWith("https");
         const protocol = isSecure ? "wss:" : "ws:";
         
-        let host = "127.0.0.1:8000";
-        if (typeof window !== "undefined" && window.location.hostname && !process.env.NEXT_PUBLIC_API_URL) {
-            host = `${window.location.hostname}:8000`;
-        } else {
-            try {
-                const urlObj = new URL(apiBase);
-                host = urlObj.host;
-            } catch {
-                // fallback host
-            }
+        let host = "thecommonroom-backend.onrender.com";
+        try {
+            const urlObj = new URL(apiBase);
+            host = urlObj.host;
+        } catch {
+            // fallback host
         }
 
         const wsUrl = `${protocol}//${host}/ws/chat/${peerId}/?token=${encodeURIComponent(token)}`;
