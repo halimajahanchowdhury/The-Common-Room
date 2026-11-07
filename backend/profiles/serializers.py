@@ -68,8 +68,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             return default_res
 
         try:
-            my_profile = user.profile
-        except AttributeError:
+            my_profile = getattr(user, 'profile', None)
+            if not my_profile:
+                my_profile = Profile.objects.filter(user=user).first()
+        except Exception:
+            my_profile = None
+
+        if not my_profile:
             return default_res
 
         # 1. Exact string matches
